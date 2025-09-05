@@ -44,6 +44,7 @@ export default async function KoordinatorDaerahDashboard() {
   const { data: currentAbsensi } = await supabase
     .from('absensi')
     .select(`
+      kelompok_id,
       hadir_putra,
       hadir_putri,
       kelompok:kelompok_id (
