@@ -59,10 +59,10 @@ export default async function ViewerDashboard() {
   let totalTarget = 0
 
   if (currentAbsensi) {
-    currentAbsensi.forEach((item) => {
+    currentAbsensi.forEach((item: any) => {
       totalHadir += item.hadir_putra + item.hadir_putri
-      if (item.kelompok) {
-        totalTarget += item.kelompok.target_putra + item.kelompok.target_putri
+      if (item.kelompok && Array.isArray(item.kelompok) && item.kelompok[0]) {
+        totalTarget += item.kelompok[0].target_putra + item.kelompok[0].target_putri
       }
     })
   }
@@ -114,10 +114,10 @@ export default async function ViewerDashboard() {
       let monthTarget = 0
 
       if (monthAbsensi) {
-        monthAbsensi.forEach((item) => {
+        monthAbsensi.forEach((item: any) => {
           monthHadir += item.hadir_putra + item.hadir_putri
-          if (item.kelompok) {
-            monthTarget += item.kelompok.target_putra + item.kelompok.target_putri
+          if (item.kelompok && Array.isArray(item.kelompok) && item.kelompok[0]) {
+            monthTarget += item.kelompok[0].target_putra + item.kelompok[0].target_putri
           }
         })
       }
