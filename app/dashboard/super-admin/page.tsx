@@ -40,10 +40,10 @@ export default async function SuperAdminDashboard() {
   let totalTarget = 0
 
   if (currentAbsensi) {
-    currentAbsensi.forEach((item) => {
+    currentAbsensi.forEach((item: any) => {
       totalHadir += item.hadir_putra + item.hadir_putri
-      if (item.kelompok) {
-        totalTarget += item.kelompok.target_putra + item.kelompok.target_putri
+      if (item.kelompok && Array.isArray(item.kelompok) && item.kelompok[0]) {
+        totalTarget += item.kelompok[0].target_putra + item.kelompok[0].target_putri
       }
     })
   }
