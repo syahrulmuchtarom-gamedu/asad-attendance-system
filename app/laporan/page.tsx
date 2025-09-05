@@ -79,7 +79,7 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
 
       // Filter absensi data for this desa
       const desaAbsensi = absensiData?.filter(
-        (item) => item.kelompok?.desa?.id === desa.id
+        (item: any) => item.kelompok && Array.isArray(item.kelompok) && item.kelompok[0]?.desa && Array.isArray(item.kelompok[0].desa) && item.kelompok[0].desa[0]?.id === desa.id
       ) || []
 
       // Calculate totals
