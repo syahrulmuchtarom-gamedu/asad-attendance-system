@@ -44,6 +44,7 @@ export default async function ViewerDashboard() {
   const { data: currentAbsensi } = await supabase
     .from('absensi')
     .select(`
+      kelompok_id,
       hadir_putra,
       hadir_putri,
       kelompok:kelompok_id (
@@ -100,6 +101,7 @@ export default async function ViewerDashboard() {
       const { data: monthAbsensi } = await supabase
         .from('absensi')
         .select(`
+          kelompok_id,
           hadir_putra,
           hadir_putri,
           kelompok:kelompok_id (
