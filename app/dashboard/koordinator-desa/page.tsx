@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Target, TrendingUp, Plus, FileText } from 'lucide-react'
 import { formatPercentage, getMonthName } from '@/lib/utils'
 
 export default async function KoordinatorDesaDashboard() {
-  const supabase = createServerClient()
+  const supabase = createServerSupabaseClient()
 
   const {
     data: { session },

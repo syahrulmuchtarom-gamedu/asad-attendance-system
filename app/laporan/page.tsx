@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { AbsensiTable } from '@/components/tables/absensi-table'
 import { AbsensiSummary } from '@/types'
 
@@ -11,7 +11,7 @@ interface LaporanPageProps {
 }
 
 export default async function LaporanPage({ searchParams }: LaporanPageProps) {
-  const supabase = createServerClient()
+  const supabase = createServerSupabaseClient()
 
   const {
     data: { session },

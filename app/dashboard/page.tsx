@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
 export default async function DashboardPage() {
   try {
-    const supabase = createServerClient()
+    const supabase = createServerSupabaseClient()
 
     const {
       data: { session },

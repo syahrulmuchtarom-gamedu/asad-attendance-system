@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 
 export default async function Layout({
@@ -8,7 +8,7 @@ export default async function Layout({
   children: React.ReactNode
 }) {
   try {
-    const supabase = createServerClient()
+    const supabase = createServerSupabaseClient()
 
     const {
       data: { session },

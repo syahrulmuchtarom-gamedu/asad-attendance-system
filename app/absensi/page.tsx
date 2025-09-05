@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { AbsensiForm } from '@/components/forms/absensi-form'
 
 export default async function AbsensiPage() {
   try {
-    const supabase = createServerClient()
+    const supabase = createServerSupabaseClient()
 
     const {
       data: { session },

@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
   try {
-    const supabase = createServerClient()
+    const supabase = createServerSupabaseClient()
     
     const {
       data: { session },

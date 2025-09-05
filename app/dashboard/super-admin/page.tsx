@@ -1,10 +1,10 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp, Calendar, UserCheck } from 'lucide-react'
 import { formatPercentage, getMonthName } from '@/lib/utils'
 
 export default async function SuperAdminDashboard() {
-  const supabase = createServerClient()
+  const supabase = createServerSupabaseClient()
 
   // Get current month/year stats
   const currentMonth = new Date().getMonth() + 1
