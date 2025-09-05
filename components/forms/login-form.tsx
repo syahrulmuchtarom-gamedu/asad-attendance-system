@@ -32,8 +32,14 @@ export function LoginForm() {
     try {
       setIsLoading(true)
 
+      // Convert username to email if needed
+      let email = data.email
+      if (!email.includes('@')) {
+        email = `${email}@asad.com`
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
+        email: email,
         password: data.password,
       })
 
@@ -77,11 +83,11 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Username atau Email</Label>
             <Input
               id="email"
-              type="email"
-              placeholder="nama@email.com"
+              type="text"
+              placeholder="suppcon atau suppcon@asad.com"
               {...register('email')}
               disabled={isLoading}
             />

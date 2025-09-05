@@ -5,7 +5,7 @@ const MAX_ATTENDANCE = 50
 const MAX_TARGET = 100
 
 export const loginSchema = z.object({
-  email: z.string().email('Email tidak valid'),
+  email: z.string().min(1, 'Username atau email harus diisi'),
   password: z.string().min(6, 'Password minimal 6 karakter')
 })
 
