@@ -59,7 +59,7 @@ export default async function KoordinatorDaerahDashboard() {
   let totalTarget = 0
 
   if (currentAbsensi) {
-    currentAbsensi.forEach((item) => {
+    currentAbsensi.forEach((item: any) => {
       totalHadir += item.hadir_putra + item.hadir_putri
       if (item.kelompok) {
         totalTarget += item.kelompok.target_putra + item.kelompok.target_putri
