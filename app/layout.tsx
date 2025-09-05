@@ -1,7 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { Toaster } from '@/components/ui/toaster'
+import { ClientToaster } from '@/components/client-toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: 'Sistem Absensi Kelompok ASAD Cengkareng',
   keywords: 'absensi, ASAD, cengkareng, sistem, kelompok',
   authors: [{ name: 'ASAD Development Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -24,7 +28,7 @@ export default function RootLayout({
         <main className="min-h-screen bg-background">
           {children}
         </main>
-        <Toaster />
+        <ClientToaster />
       </body>
     </html>
   )
