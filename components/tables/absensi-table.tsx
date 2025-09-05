@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Download, FileText, Printer } from 'lucide-react'
 import { AbsensiSummary } from '@/types'
@@ -174,6 +173,7 @@ export function AbsensiTable({
                       totalPersentasePutra={totalPersentasePutra}
                       totalPersentasePutri={totalPersentasePutri}
                     />
+                  </>
                 ) : (
                   <tr>
                     <td colSpan={8} className="border border-gray-300 px-4 py-8 text-center text-muted-foreground">
