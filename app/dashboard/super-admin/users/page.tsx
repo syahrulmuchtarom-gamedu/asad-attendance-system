@@ -1,7 +1,10 @@
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
 import { Users, Plus, Edit, Trash2 } from 'lucide-react'
 
 // Mock users data
@@ -21,18 +24,63 @@ const roleLabels = {
   'viewer': 'Viewer'
 }
 
-export default async function UsersPage() {
-  const cookieStore = cookies()
-  const sessionCookie = cookieStore.get('user_session')?.value
-  
-  if (!sessionCookie) {
-    redirect('/login')
+export default function UsersPage() {
+  const [users, setUsers] = useState(mockUsers)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check auth on client side
+    const sessionCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('user_session='))
+      ?.split('=')[1]
+    
+    if (!sessionCookie) {
+      router.push('/login')
+      return
+    }
+
+    try {
+      const user = JSON.parse(decodeURIComponent(sessionCookie))
+      if (user.role !== 'super_admin') {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      router.push('/login')
+    }
+  }, [])
+
+  const handleAddUser = () => {
+    toast({
+      title: "Fitur Tambah User",
+      description: "Fitur ini akan segera tersedia",
+    })
   }
 
-  const user = JSON.parse(sessionCookie)
+  const handleEditUser = (userId: number) => {
+    toast({
+      title: "Edit User",
+      description: `Edit user dengan ID: ${userId}`,
+    })
+  }
 
-  if (user.role !== 'super_admin') {
-    redirect('/dashboard')
+  const handleDeleteUser = (userId: number) => {
+    if (userId === 1) {
+      toast({
+        variant: "destructive",
+        title: "Tidak Dapat Menghapus",
+        description: "Super Admin tidak dapat dihapus",
+      })
+      return
+    }
+
+    const updatedUsers = users.filter(u => u.id !== userId)
+    setUsers(updatedUsers)
+    toast({
+      title: "User Dihapus",
+      description: "User berhasil dihapus dari sistem",
+    })
   }
 
   return (
@@ -44,7 +92,7 @@ export default async function UsersPage() {
             Manajemen user dan hak akses sistem
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddUser}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah User
         </Button>
@@ -70,7 +118,7 @@ export default async function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="border-b hover:bg-gray-50">
                     <td className="p-3 font-medium">{user.username}</td>
                     <td className="p-3">{user.full_name}</td>
@@ -87,10 +135,19 @@ export default async function UsersPage() {
                     <td className="p-3">{user.desa_name}</td>
                     <td className="p-3">
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditUser(user.id)}
+                        >
                           <Edit className="h-3 w-3" />
                         </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
@@ -109,7 +166,7 @@ export default async function UsersPage() {
             <CardTitle className="text-sm font-medium">Total User</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockUsers.length}</div>
+            <div className="text-2xl font-bold">{users.length}</div>
             <p className="text-xs text-muted-foreground">User terdaftar</p>
           </CardContent>
         </Card>
@@ -120,7 +177,7 @@ export default async function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mockUsers.filter(u => u.role === 'koordinator_desa').length}
+              {users.filter(u => u.role === 'koordinator_desa').length}
             </div>
             <p className="text-xs text-muted-foreground">User koordinator desa</p>
           </CardContent>
@@ -132,7 +189,7 @@ export default async function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mockUsers.filter(u => u.role === 'super_admin').length}
+              {users.filter(u => u.role === 'super_admin').length}
             </div>
             <p className="text-xs text-muted-foreground">User admin</p>
           </CardContent>

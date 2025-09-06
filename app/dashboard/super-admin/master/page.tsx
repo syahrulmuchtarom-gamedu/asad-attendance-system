@@ -1,7 +1,10 @@
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
 import { Building2, Users, Plus, Edit } from 'lucide-react'
 
 // Mock data
@@ -24,18 +27,59 @@ const mockKelompok = [
   { id: 5, nama_kelompok: 'Damar', desa_name: 'Jelambar', target_putra: 25 },
 ]
 
-export default async function MasterDataPage() {
-  const cookieStore = cookies()
-  const sessionCookie = cookieStore.get('user_session')?.value
-  
-  if (!sessionCookie) {
-    redirect('/login')
+export default function MasterDataPage() {
+  const [desa, setDesa] = useState(mockDesa)
+  const [kelompok, setKelompok] = useState(mockKelompok)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    const sessionCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('user_session='))
+      ?.split('=')[1]
+    
+    if (!sessionCookie) {
+      router.push('/login')
+      return
+    }
+
+    try {
+      const user = JSON.parse(decodeURIComponent(sessionCookie))
+      if (user.role !== 'super_admin') {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      router.push('/login')
+    }
+  }, [])
+
+  const handleAddDesa = () => {
+    toast({
+      title: "Tambah Desa",
+      description: "Fitur tambah desa akan segera tersedia",
+    })
   }
 
-  const user = JSON.parse(sessionCookie)
+  const handleEditDesa = (desaId: number) => {
+    toast({
+      title: "Edit Desa",
+      description: `Edit desa dengan ID: ${desaId}`,
+    })
+  }
 
-  if (user.role !== 'super_admin') {
-    redirect('/dashboard')
+  const handleAddKelompok = () => {
+    toast({
+      title: "Tambah Kelompok",
+      description: "Fitur tambah kelompok akan segera tersedia",
+    })
+  }
+
+  const handleEditKelompok = (kelompokId: number) => {
+    toast({
+      title: "Edit Kelompok",
+      description: `Edit kelompok dengan ID: ${kelompokId}`,
+    })
   }
 
   return (
@@ -55,22 +99,22 @@ export default async function MasterDataPage() {
               <Building2 className="h-5 w-5" />
               Data Desa
             </CardTitle>
-            <Button size="sm">
+            <Button size="sm" onClick={handleAddDesa}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {mockDesa.map((desa) => (
-                <div key={desa.id} className="flex items-center justify-between p-2 border rounded">
+              {desa.map((desaItem) => (
+                <div key={desaItem.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
-                    <p className="font-medium">{desa.nama_desa}</p>
+                    <p className="font-medium">{desaItem.nama_desa}</p>
                     <p className="text-sm text-muted-foreground">
-                      {desa.kelompok_count} kelompok
+                      {desaItem.kelompok_count} kelompok
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleEditDesa(desaItem.id)}>
                     <Edit className="h-3 w-3" />
                   </Button>
                 </div>
@@ -86,22 +130,22 @@ export default async function MasterDataPage() {
               <Users className="h-5 w-5" />
               Data Kelompok
             </CardTitle>
-            <Button size="sm">
+            <Button size="sm" onClick={handleAddKelompok}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {mockKelompok.map((kelompok) => (
-                <div key={kelompok.id} className="flex items-center justify-between p-2 border rounded">
+              {kelompok.map((kelompokItem) => (
+                <div key={kelompokItem.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
-                    <p className="font-medium">{kelompok.nama_kelompok}</p>
+                    <p className="font-medium">{kelompokItem.nama_kelompok}</p>
                     <p className="text-sm text-muted-foreground">
-                      {kelompok.desa_name} • Target: {kelompok.target_putra}
+                      {kelompokItem.desa_name} • Target: {kelompokItem.target_putra}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleEditKelompok(kelompokItem.id)}>
                     <Edit className="h-3 w-3" />
                   </Button>
                 </div>
@@ -118,7 +162,7 @@ export default async function MasterDataPage() {
             <CardTitle className="text-sm font-medium">Total Desa</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockDesa.length}</div>
+            <div className="text-2xl font-bold">{desa.length}</div>
             <p className="text-xs text-muted-foreground">Desa terdaftar</p>
           </CardContent>
         </Card>
