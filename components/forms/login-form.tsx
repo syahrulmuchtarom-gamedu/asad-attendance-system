@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createClient } from '@/lib/supabase/client'
 import { loginSchema, type LoginInput } from '@/lib/validations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,7 +17,6 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   const {
     register,
@@ -32,24 +30,22 @@ export function LoginForm() {
     try {
       setIsLoading(true)
 
-      // Convert username to email if needed
-      let email = data.email
-      if (!email.includes('@')) {
-        email = `${email}@asad.com`
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: data.password,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: data.email, // field name tetap email tapi isinya username
+          password: data.password,
+        }),
       })
 
-      if (error) {
+      const result = await response.json()
+
+      if (!response.ok) {
         toast({
           variant: "destructive",
           title: "Login Gagal",
-          description: error.message === 'Invalid login credentials' 
-            ? 'Email atau password salah' 
-            : error.message,
+          description: result.error || 'Username atau password salah',
         })
         return
       }
@@ -83,11 +79,11 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Username atau Email</Label>
+            <Label htmlFor="email">Username</Label>
             <Input
               id="email"
               type="text"
-              placeholder="suppcon atau suppcon@asad.com"
+              placeholder="admin, koordinator, viewer"
               {...register('email')}
               disabled={isLoading}
             />

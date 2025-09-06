@@ -1,4 +1,3 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -10,91 +9,53 @@ export async function middleware(request: NextRequest) {
       },
     })
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return request.cookies.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            request.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-          },
-          remove(name: string, options: any) {
-            request.cookies.set({
-              name,
-              value: '',
-              ...options,
-            })
-            response.cookies.set({
-              name,
-              value: '',
-              ...options,
-            })
-          },
-        },
+    // Get user session from cookie
+    const sessionCookie = request.cookies.get('user_session')?.value
+    let user = null
+    
+    if (sessionCookie) {
+      try {
+        user = JSON.parse(sessionCookie)
+      } catch (e) {
+        // Invalid session cookie
       }
-    )
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    }
 
     // Public routes that don't require authentication
     const publicRoutes = ['/login', '/register', '/']
     const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname)
 
     // If user is not authenticated and trying to access protected route
-    if (!session && !isPublicRoute) {
+    if (!user && !isPublicRoute) {
       const loginUrl = new URL('/login', request.url)
       return NextResponse.redirect(loginUrl)
     }
 
     // If user is authenticated and trying to access auth pages
-    if (session && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+    if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
       const dashboardUrl = new URL('/dashboard', request.url)
       return NextResponse.redirect(dashboardUrl)
     }
 
-    // Get user profile for role-based access
-    if (session) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, desa_id')
-        .eq('id', session.user.id)
-        .single()
+    // Role-based route protection
+    if (user) {
+      const pathname = request.nextUrl.pathname
+      const dashboardUrl = new URL('/dashboard', request.url)
+      
+      if (pathname.startsWith('/dashboard/super-admin') && user.role !== 'super_admin') {
+        return NextResponse.redirect(dashboardUrl)
+      }
 
-      if (profile) {
-        // Role-based route protection
-        const pathname = request.nextUrl.pathname
+      if (pathname.startsWith('/dashboard/koordinator-desa') && user.role !== 'koordinator_desa') {
+        return NextResponse.redirect(dashboardUrl)
+      }
 
-        const dashboardUrl = new URL('/dashboard', request.url)
-        
-        if (pathname.startsWith('/dashboard/super-admin') && profile.role !== 'super_admin') {
-          return NextResponse.redirect(dashboardUrl)
-        }
+      if (pathname.startsWith('/dashboard/koordinator-daerah') && user.role !== 'koordinator_daerah') {
+        return NextResponse.redirect(dashboardUrl)
+      }
 
-        if (pathname.startsWith('/dashboard/koordinator-desa') && profile.role !== 'koordinator_desa') {
-          return NextResponse.redirect(dashboardUrl)
-        }
-
-        if (pathname.startsWith('/dashboard/koordinator-daerah') && profile.role !== 'koordinator_daerah') {
-          return NextResponse.redirect(dashboardUrl)
-        }
-
-        if (pathname.startsWith('/dashboard/viewer') && profile.role !== 'viewer') {
-          return NextResponse.redirect(dashboardUrl)
-        }
+      if (pathname.startsWith('/dashboard/viewer') && user.role !== 'viewer') {
+        return NextResponse.redirect(dashboardUrl)
       }
     }
 
