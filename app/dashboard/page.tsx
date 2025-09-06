@@ -1,29 +1,32 @@
 import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth/session'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
 export default async function DashboardPage() {
   try {
-    const user = getSession()
+    const supabase = createServerSupabaseClient()
 
-    if (!user) {
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabase.auth.getSession()
+
+    if (sessionError || !session) {
       redirect('/login')
     }
 
-    // Redirect to role-specific dashboard
-    switch (user.role) {
-    case 'super_admin':
-      redirect('/dashboard/super-admin')
-    case 'koordinator_desa':
-      redirect('/dashboard/koordinator-desa')
-    case 'koordinator_daerah':
-      redirect('/dashboard/koordinator-daerah')
-    case 'viewer':
-      redirect('/dashboard/viewer')
-    default:
-      break
-  }
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single()
+
+    if (profileError || !profile) {
+      redirect('/login')
+    }
+
+    // Show fallback dashboard instead of redirecting
 
     // Fallback dashboard for unknown roles
     return (
