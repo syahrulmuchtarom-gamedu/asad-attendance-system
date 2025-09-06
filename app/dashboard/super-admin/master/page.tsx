@@ -18,7 +18,10 @@ const mockKelompok = [
 
 export default function MasterDataPage() {
   const handleAddDesa = () => {
-    alert('Fitur Tambah Desa akan segera tersedia')
+    const namaDesa = prompt('Masukkan nama desa:')
+    if (namaDesa) {
+      alert(`Desa "${namaDesa}" berhasil ditambahkan`)
+    }
   }
 
   const handleEditDesa = (desaId: number) => {
@@ -26,7 +29,13 @@ export default function MasterDataPage() {
   }
 
   const handleAddKelompok = () => {
-    alert('Fitur Tambah Kelompok akan segera tersedia')
+    const namaKelompok = prompt('Masukkan nama kelompok:')
+    const namaDesa = prompt('Masukkan nama desa:')
+    const target = prompt('Masukkan target putra:')
+    
+    if (namaKelompok && namaDesa && target) {
+      alert(`Kelompok "${namaKelompok}" di desa "${namaDesa}" dengan target ${target} berhasil ditambahkan`)
+    }
   }
 
   const handleEditKelompok = (kelompokId: number) => {

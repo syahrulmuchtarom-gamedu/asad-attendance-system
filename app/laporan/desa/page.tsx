@@ -4,26 +4,21 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BarChart3, Download, FileText, Calendar } from 'lucide-react'
+import { BarChart3, Download, FileText, Calendar, Users } from 'lucide-react'
 
-const mockLaporan = [
-  { desa: 'Kapuk Melati', target: 75, hadir: 68, persentase: 90.7 },
-  { desa: 'Jelambar', target: 100, hadir: 85, persentase: 85.0 },
-  { desa: 'Cengkareng', target: 75, hadir: 72, persentase: 96.0 },
-  { desa: 'Kebon Jahe', target: 100, hadir: 78, persentase: 78.0 },
-  { desa: 'Bandara', target: 75, hadir: 65, persentase: 86.7 },
-  { desa: 'Taman Kota', target: 100, hadir: 92, persentase: 92.0 },
-  { desa: 'Kalideres', target: 125, hadir: 110, persentase: 88.0 },
-  { desa: 'Cipondoh', target: 100, hadir: 88, persentase: 88.0 },
+const mockLaporanDesa = [
+  { kelompok: 'Melati A', target_putra: 25, hadir_putra: 23, target_putri: 0, hadir_putri: 0, persentase: 92.0 },
+  { kelompok: 'Melati B', target_putra: 25, hadir_putra: 22, target_putri: 0, hadir_putri: 0, persentase: 88.0 },
+  { kelompok: 'BGN', target_putra: 25, hadir_putra: 23, target_putri: 0, hadir_putri: 0, persentase: 92.0 },
 ]
 
-export default function LaporanPage() {
+export default function LaporanDesaPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
   const [selectedYear, setSelectedYear] = useState('2024')
 
-  const totalTarget = mockLaporan.reduce((sum, item) => sum + item.target, 0)
-  const totalHadir = mockLaporan.reduce((sum, item) => sum + item.hadir, 0)
-  const overallPercentage = (totalHadir / totalTarget) * 100
+  const totalTargetPutra = mockLaporanDesa.reduce((sum, item) => sum + item.target_putra, 0)
+  const totalHadirPutra = mockLaporanDesa.reduce((sum, item) => sum + item.hadir_putra, 0)
+  const overallPercentage = (totalHadirPutra / totalTargetPutra) * 100
 
   const handleExportPDF = () => {
     alert('Export PDF akan segera tersedia')
@@ -41,9 +36,9 @@ export default function LaporanPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Laporan Kehadiran</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Laporan Desa</h1>
           <p className="text-muted-foreground">
-            Laporan kehadiran bulanan semua desa
+            Laporan kehadiran kelompok di desa Kapuk Melati
           </p>
         </div>
         <div className="flex gap-2">
@@ -115,38 +110,38 @@ export default function LaporanPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Target</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Kelompok</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTarget}</div>
+            <div className="text-2xl font-bold">{mockLaporanDesa.length}</div>
+            <p className="text-xs text-muted-foreground">Kelompok</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Target Putra</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalTargetPutra}</div>
             <p className="text-xs text-muted-foreground">Orang</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Hadir</CardTitle>
+            <CardTitle className="text-sm font-medium">Hadir Putra</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalHadir}</div>
+            <div className="text-2xl font-bold">{totalHadirPutra}</div>
             <p className="text-xs text-muted-foreground">Orang</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Persentase Keseluruhan</CardTitle>
+            <CardTitle className="text-sm font-medium">Persentase Desa</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{overallPercentage.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">Kehadiran</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Periode</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Des</div>
-            <p className="text-xs text-muted-foreground">2024</p>
           </CardContent>
         </Card>
       </div>
@@ -155,8 +150,8 @@ export default function LaporanPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Laporan per Desa
+            <Users className="h-5 w-5" />
+            Laporan per Kelompok
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -164,19 +159,23 @@ export default function LaporanPage() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-3 font-medium">Desa</th>
-                  <th className="text-center p-3 font-medium">Target</th>
-                  <th className="text-center p-3 font-medium">Hadir</th>
+                  <th className="text-left p-3 font-medium">Kelompok</th>
+                  <th className="text-center p-3 font-medium">Target Putra</th>
+                  <th className="text-center p-3 font-medium">Hadir Putra</th>
+                  <th className="text-center p-3 font-medium">Target Putri</th>
+                  <th className="text-center p-3 font-medium">Hadir Putri</th>
                   <th className="text-center p-3 font-medium">Persentase</th>
                   <th className="text-center p-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {mockLaporan.map((item, index) => (
+                {mockLaporanDesa.map((item, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{item.desa}</td>
-                    <td className="p-3 text-center">{item.target}</td>
-                    <td className="p-3 text-center">{item.hadir}</td>
+                    <td className="p-3 font-medium">{item.kelompok}</td>
+                    <td className="p-3 text-center">{item.target_putra}</td>
+                    <td className="p-3 text-center">{item.hadir_putra}</td>
+                    <td className="p-3 text-center">{item.target_putri}</td>
+                    <td className="p-3 text-center">{item.hadir_putri}</td>
                     <td className="p-3 text-center font-bold">{item.persentase.toFixed(1)}%</td>
                     <td className="p-3 text-center">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -194,8 +193,10 @@ export default function LaporanPage() {
               <tfoot>
                 <tr className="border-t-2 bg-gray-50">
                   <td className="p-3 font-bold">TOTAL</td>
-                  <td className="p-3 text-center font-bold">{totalTarget}</td>
-                  <td className="p-3 text-center font-bold">{totalHadir}</td>
+                  <td className="p-3 text-center font-bold">{totalTargetPutra}</td>
+                  <td className="p-3 text-center font-bold">{totalHadirPutra}</td>
+                  <td className="p-3 text-center font-bold">0</td>
+                  <td className="p-3 text-center font-bold">0</td>
                   <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
                   <td className="p-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${

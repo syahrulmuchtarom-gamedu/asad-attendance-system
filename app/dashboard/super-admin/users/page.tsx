@@ -15,7 +15,21 @@ export default function UsersPage() {
   const [users, setUsers] = useState(mockUsers)
 
   const handleAddUser = () => {
-    alert('Fitur Tambah User akan segera tersedia')
+    const username = prompt('Masukkan username:')
+    const fullName = prompt('Masukkan nama lengkap:')
+    const role = prompt('Masukkan role (super_admin/koordinator_desa/koordinator_daerah/viewer):')
+    
+    if (username && fullName && role) {
+      const newUser = {
+        id: users.length + 1,
+        username,
+        full_name: fullName,
+        role,
+        desa_name: role === 'koordinator_desa' ? 'Desa Baru' : '-'
+      }
+      setUsers([...users, newUser])
+      alert('User berhasil ditambahkan')
+    }
   }
 
   const handleEditUser = (userId: number) => {
