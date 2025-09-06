@@ -33,13 +33,20 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut()
-      toast({
-        title: "Logout Berhasil",
-        description: "Anda telah keluar dari sistem",
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
       })
-      router.push('/login')
-      router.refresh()
+
+      if (response.ok) {
+        toast({
+          title: "Logout Berhasil",
+          description: "Anda telah keluar dari sistem",
+        })
+        router.push('/login')
+        router.refresh()
+      } else {
+        throw new Error('Logout failed')
+      }
     } catch (error) {
       toast({
         variant: "destructive",
