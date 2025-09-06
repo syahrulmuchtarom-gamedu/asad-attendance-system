@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Building2, Users, Plus, Edit } from 'lucide-react'
@@ -15,6 +17,22 @@ const mockKelompok = [
 ]
 
 export default function MasterDataPage() {
+  const handleAddDesa = () => {
+    alert('Fitur Tambah Desa akan segera tersedia')
+  }
+
+  const handleEditDesa = (desaId: number) => {
+    alert(`Edit desa dengan ID: ${desaId}`)
+  }
+
+  const handleAddKelompok = () => {
+    alert('Fitur Tambah Kelompok akan segera tersedia')
+  }
+
+  const handleEditKelompok = (kelompokId: number) => {
+    alert(`Edit kelompok dengan ID: ${kelompokId}`)
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,7 +49,7 @@ export default function MasterDataPage() {
               <Building2 className="h-5 w-5" />
               Data Desa
             </CardTitle>
-            <Button size="sm">
+            <Button size="sm" onClick={handleAddDesa}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
@@ -46,7 +64,11 @@ export default function MasterDataPage() {
                       {desa.kelompok_count} kelompok
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditDesa(desa.id)}
+                  >
                     <Edit className="h-3 w-3" />
                   </Button>
                 </div>
@@ -61,7 +83,7 @@ export default function MasterDataPage() {
               <Users className="h-5 w-5" />
               Data Kelompok
             </CardTitle>
-            <Button size="sm">
+            <Button size="sm" onClick={handleAddKelompok}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
@@ -76,7 +98,11 @@ export default function MasterDataPage() {
                       {kelompok.desa_name} • Target: {kelompok.target_putra}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditKelompok(kelompok.id)}
+                  >
                     <Edit className="h-3 w-3" />
                   </Button>
                 </div>
