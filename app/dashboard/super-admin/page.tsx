@@ -1,10 +1,26 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { getSession } from '@/lib/auth/session'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp, Calendar, UserCheck } from 'lucide-react'
-import { formatPercentage, getMonthName } from '@/lib/utils'
+import { redirect } from 'next/navigation'
+
+function formatPercentage(value: number): string {
+  return `${value.toFixed(1)}%`
+}
+
+function getMonthName(month: number): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  return months[month - 1] || ''
+}
 
 export default async function SuperAdminDashboard() {
-  const supabase = createServerSupabaseClient()
+  const user = getSession()
+  
+  if (!user || user.role !== 'super_admin') {
+    redirect('/dashboard')
+  }
+  
+  const supabase = createClient()
 
   // Get current month/year stats
   const currentMonth = new Date().getMonth() + 1
@@ -18,7 +34,7 @@ export default async function SuperAdminDashboard() {
   ] = await Promise.all([
     supabase.from('desa').select('*', { count: 'exact', head: true }),
     supabase.from('kelompok').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('users').select('*', { count: 'exact', head: true }),
   ])
 
   // Get current month attendance data
@@ -61,9 +77,9 @@ export default async function SuperAdminDashboard() {
           nama_desa
         )
       ),
-      profiles:input_by (
+      users:input_by (
         full_name,
-        email
+        username
       )
     `)
     .order('created_at', { ascending: false })
@@ -157,7 +173,7 @@ export default async function SuperAdminDashboard() {
                       Putra: {item.hadir_putra}, Putri: {item.hadir_putri}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Oleh: {item.profiles?.full_name || item.profiles?.email}
+                      Oleh: {item.users?.full_name || item.users?.username}
                     </p>
                   </div>
                   <div className="text-xs text-muted-foreground">
