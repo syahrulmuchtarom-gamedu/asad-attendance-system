@@ -1,11 +1,11 @@
-import { getSession } from '@/lib/auth/session'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, Building2, Target, TrendingUp } from 'lucide-react'
-import { redirect } from 'next/navigation'
-
 export default function SuperAdminDashboard() {
-  const user = getSession()
-  
+  return (
+    <div>
+      <h1>Dashboard Super Admin</h1>
+      <p>Login berhasil!</p>
+    </div>
+  )
+}
   if (!user || user.role !== 'super_admin') {
     redirect('/dashboard')
   }
@@ -87,5 +87,4 @@ export default function SuperAdminDashboard() {
       </Card>
     </div>
   )
-}
 }
