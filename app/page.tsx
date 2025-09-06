@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth/session'
+import { cookies } from 'next/headers'
 
 export default async function HomePage() {
   try {
-    const user = getSession()
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
     
-    if (user) {
+    if (sessionCookie) {
       redirect('/dashboard')
     } else {
       redirect('/login')
