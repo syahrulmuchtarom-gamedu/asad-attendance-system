@@ -36,7 +36,8 @@ export default async function AbsensiPage() {
       nama_kelompok: nama,
       desa_id: user.desa_id,
       target_putra: 25,
-      target_putri: 0
+      target_putri: 0,
+      created_at: new Date().toISOString()
     }))
 
     const currentMonth = new Date().getMonth() + 1
