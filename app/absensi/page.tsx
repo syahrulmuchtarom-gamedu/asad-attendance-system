@@ -1,40 +1,43 @@
 import { redirect } from 'next/navigation'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 import { AbsensiForm } from '@/components/forms/absensi-form'
+
+// Mock data kelompok per desa
+const KELOMPOK_DATA = {
+  1: ['Melati A', 'Melati B', 'BGN'], // Kapuk Melati
+  2: ['Indah', 'Damar', 'Jaya', 'Pejagalan'], // Jelambar
+  3: ['Fajar A', 'Fajar B', 'Fajar C'], // Cengkareng
+  4: ['Kebon Jahe A', 'Kebon Jahe B', 'Garikas', 'Taniwan'], // Kebon Jahe
+  5: ['Rawel', 'Prima', 'Kamdur'], // Bandara
+  6: ['Rawa Buaya A', 'Rawa Buaya B', 'Taman Kota A', 'Taman Kota B'], // Taman Kota
+  7: ['Tegal Alur A', 'Tegal Alur B', 'Prepedan A', 'Prepedan B', 'Kebon Kelapa'], // Kalideres
+  8: ['Griya Permata', 'Semanan A', 'Semanan B', 'Pondok Bahar'] // Cipondoh
+}
 
 export default async function AbsensiPage() {
   try {
-    const supabase = createServerSupabaseClient()
-
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession()
-
-    if (sessionError || !session) {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
       redirect('/login')
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single()
+    const user = JSON.parse(sessionCookie)
 
-    if (profileError || !profile || profile.role !== 'koordinator_desa' || !profile.desa_id) {
+    if (user.role !== 'koordinator_desa' || !user.desa_id) {
       redirect('/dashboard')
     }
 
     // Get kelompok for this desa
-    const { data: kelompokList, error: kelompokError } = await supabase
-      .from('kelompok')
-      .select('*')
-      .eq('desa_id', profile.desa_id)
-      .order('nama_kelompok')
-
-    if (kelompokError) {
-      console.error('Error fetching kelompok:', kelompokError)
-    }
+    const kelompokNames = KELOMPOK_DATA[user.desa_id] || []
+    const kelompokList = kelompokNames.map((nama, index) => ({
+      id: (user.desa_id * 10) + index + 1,
+      nama_kelompok: nama,
+      desa_id: user.desa_id,
+      target_putra: 25,
+      target_putri: 0
+    }))
 
     const currentMonth = new Date().getMonth() + 1
     const currentYear = new Date().getFullYear()
@@ -49,8 +52,8 @@ export default async function AbsensiPage() {
         </div>
 
         <AbsensiForm
-          kelompokList={kelompokList || []}
-          userId={session.user.id}
+          kelompokList={kelompokList}
+          userId={user.id.toString()}
           currentMonth={currentMonth}
           currentYear={currentYear}
         />

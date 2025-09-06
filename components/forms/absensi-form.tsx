@@ -63,38 +63,18 @@ export function AbsensiForm({ kelompokList, userId, currentMonth, currentYear }:
     try {
       setIsLoading(true)
 
-      // Check if data already exists
-      const { data: existingData, error: checkError } = await supabase
-        .from('absensi')
-        .select('id')
-        .eq('kelompok_id', data.kelompok_id)
-        .eq('bulan', data.bulan)
-        .eq('tahun', data.tahun)
-        .single()
+      const response = await fetch('/api/absensi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw new Error('Gagal memeriksa data duplikat')
-      }
+      const result = await response.json()
 
-      if (existingData) {
-        toast({
-          variant: "destructive",
-          title: "Data Sudah Ada",
-          description: `Absensi untuk kelompok ini pada ${getMonthName(data.bulan)} ${data.tahun} sudah ada`,
-        })
-        return
-      }
-
-      // Insert new data
-      const { error } = await supabase
-        .from('absensi')
-        .insert({
-          ...data,
-          input_by: userId,
-        })
-
-      if (error) {
-        throw error
+      if (!response.ok) {
+        throw new Error(result.error || 'Gagal menyimpan data')
       }
 
       toast({

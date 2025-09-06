@@ -20,18 +20,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    // Hardcoded users for testing
+    const users = [
+      {
+        id: 1,
+        username: 'admin',
+        password: 'admin123',
+        full_name: 'Super Admin',
+        role: 'super_admin',
+        desa_id: null
+      },
+      {
+        id: 2,
+        username: 'koordinator1',
+        password: 'admin123',
+        full_name: 'Koordinator Kapuk Melati',
+        role: 'koordinator_desa',
+        desa_id: 1
+      },
+      {
+        id: 3,
+        username: 'koordinator2',
+        password: 'admin123',
+        full_name: 'Koordinator Jelambar',
+        role: 'koordinator_desa',
+        desa_id: 2
+      }
+    ]
 
-    // Query user dari tabel users
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .eq('password', password)
-      .eq('is_active', true)
-      .single()
+    const user = users.find(u => u.username === username && u.password === password)
 
-    if (error || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Username atau password salah' },
         { status: 401 }
