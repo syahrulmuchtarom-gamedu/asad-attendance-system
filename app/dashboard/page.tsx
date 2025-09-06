@@ -1,33 +1,18 @@
 import { redirect } from 'next/navigation'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSession } from '@/lib/auth/session'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
 export default async function DashboardPage() {
   try {
-    const supabase = createServerSupabaseClient()
+    const user = getSession()
 
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession()
-
-    if (sessionError || !session) {
+    if (!user) {
       redirect('/login')
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single()
-
-    if (profileError || !profile) {
-      redirect('/login')
-    }
-
-  // Redirect to role-specific dashboard
-  switch (profile.role) {
+    // Redirect to role-specific dashboard
+    switch (user.role) {
     case 'super_admin':
       redirect('/dashboard/super-admin')
     case 'koordinator_desa':
