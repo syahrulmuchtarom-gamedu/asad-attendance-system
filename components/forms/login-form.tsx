@@ -29,6 +29,7 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     try {
       setIsLoading(true)
+      console.log('Submitting to /api/auth/login with:', { username: data.email })
 
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -38,6 +39,9 @@ export function LoginForm() {
           password: data.password,
         }),
       })
+      
+      console.log('Response status:', response.status)
+      console.log('Response URL:', response.url)
 
       const result = await response.json()
 
@@ -77,7 +81,7 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" action="javascript:void(0)">
           <div className="space-y-2">
             <Label htmlFor="email">Username</Label>
             <Input
