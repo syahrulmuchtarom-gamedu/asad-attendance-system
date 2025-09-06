@@ -30,7 +30,7 @@ export default async function AbsensiPage() {
     }
 
     // Get kelompok for this desa
-    const kelompokNames = KELOMPOK_DATA[user.desa_id] || []
+    const kelompokNames = KELOMPOK_DATA[user.desa_id as keyof typeof KELOMPOK_DATA] || []
     const kelompokList = kelompokNames.map((nama, index) => ({
       id: (user.desa_id * 10) + index + 1,
       nama_kelompok: nama,
