@@ -21,9 +21,36 @@ INSERT INTO public.users (username, password, full_name, role, desa_id) VALUES
 ('viewer', 'viewer123', 'Viewer User', 'viewer', NULL);
 
 -- 3. Update tabel absensi untuk reference ke users baru
+-- Hapus view yang bergantung pada kolom input_by
+DROP VIEW IF EXISTS public.absensi_with_details;
+
+-- Hapus constraint lama
 ALTER TABLE public.absensi DROP CONSTRAINT IF EXISTS absensi_input_by_fkey;
+
+-- Ubah tipe kolom input_by dari UUID ke INTEGER
+ALTER TABLE public.absensi ALTER COLUMN input_by TYPE INTEGER USING NULL;
+
+-- Tambah foreign key constraint baru
 ALTER TABLE public.absensi ADD CONSTRAINT absensi_input_by_fkey 
 FOREIGN KEY (input_by) REFERENCES public.users(id);
+
+-- Buat ulang view dengan reference ke tabel users
+CREATE OR REPLACE VIEW public.absensi_with_details AS
+SELECT 
+  a.*,
+  k.nama_kelompok,
+  k.target_putra,
+  k.target_putri,
+  d.nama_desa,
+  u.full_name as input_by_name,
+  u.username as input_by_username
+FROM public.absensi a
+JOIN public.kelompok k ON a.kelompok_id = k.id
+JOIN public.desa d ON k.desa_id = d.id
+LEFT JOIN public.users u ON a.input_by = u.id;
+
+-- Grant permissions pada view
+GRANT SELECT ON public.absensi_with_details TO authenticated;
 
 -- 4. Hapus tabel profiles lama (opsional)
 -- DROP TABLE IF EXISTS public.profiles CASCADE;
