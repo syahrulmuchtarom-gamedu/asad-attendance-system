@@ -34,25 +34,30 @@ export default function MasterDataPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const sessionCookie = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_session='))
-      ?.split('=')[1]
-    
-    if (!sessionCookie) {
-      router.push('/login')
-      return
+    const checkAuth = () => {
+      try {
+        const cookies = document.cookie.split(';')
+        const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
+        
+        if (!sessionCookie) {
+          router.push('/login')
+          return
+        }
+
+        const cookieValue = sessionCookie.split('=')[1]
+        const user = JSON.parse(decodeURIComponent(cookieValue))
+        
+        if (user.role !== 'super_admin') {
+          router.push('/dashboard')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/login')
+      }
     }
 
-    try {
-      const user = JSON.parse(decodeURIComponent(sessionCookie))
-      if (user.role !== 'super_admin') {
-        router.push('/dashboard')
-      }
-    } catch (error) {
-      router.push('/login')
-    }
-  }, [])
+    checkAuth()
+  }, [router])
 
   const handleAddDesa = () => {
     toast({
