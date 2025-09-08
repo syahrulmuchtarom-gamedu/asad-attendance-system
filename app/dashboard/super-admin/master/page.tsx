@@ -1,45 +1,156 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Building2, Users, Plus, Edit } from 'lucide-react'
+import { Building2, Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { DesaForm } from '@/components/forms/desa-form'
+import { KelompokForm } from '@/components/forms/kelompok-form'
+import { useToast } from '@/hooks/use-toast'
 
-const mockDesa = [
-  { id: 1, nama_desa: 'Kapuk Melati', kelompok_count: 3 },
-  { id: 2, nama_desa: 'Jelambar', kelompok_count: 4 },
-  { id: 3, nama_desa: 'Cengkareng', kelompok_count: 3 },
-]
+interface Desa {
+  id: number
+  nama_desa: string
+  kelompok_count: number
+}
 
-const mockKelompok = [
-  { id: 1, nama_kelompok: 'Melati A', desa_name: 'Kapuk Melati', target_putra: 25 },
-  { id: 2, nama_kelompok: 'Melati B', desa_name: 'Kapuk Melati', target_putra: 25 },
-  { id: 3, nama_kelompok: 'BGN', desa_name: 'Kapuk Melati', target_putra: 25 },
-]
+interface Kelompok {
+  id: number
+  nama_kelompok: string
+  desa_name: string
+  desa_id: number
+  target_putra: number
+}
 
 export default function MasterDataPage() {
-  const handleAddDesa = () => {
-    const namaDesa = prompt('Masukkan nama desa:')
-    if (namaDesa) {
-      alert(`Desa "${namaDesa}" berhasil ditambahkan`)
+  const [desa, setDesa] = useState<Desa[]>([])
+  const [kelompok, setKelompok] = useState<Kelompok[]>([])
+  const [isDesaFormOpen, setIsDesaFormOpen] = useState(false)
+  const [isKelompokFormOpen, setIsKelompokFormOpen] = useState(false)
+  const [editingDesa, setEditingDesa] = useState<Desa | null>(null)
+  const [editingKelompok, setEditingKelompok] = useState<Kelompok | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    fetchDesa()
+    fetchKelompok()
+  }, [])
+
+  const fetchDesa = async () => {
+    try {
+      const response = await fetch('/api/desa')
+      if (response.ok) {
+        const data = await response.json()
+        setDesa(data)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal memuat data desa', variant: 'destructive' })
     }
   }
 
-  const handleEditDesa = (desaId: number) => {
-    alert(`Edit desa dengan ID: ${desaId}`)
+  const fetchKelompok = async () => {
+    try {
+      const response = await fetch('/api/kelompok')
+      if (response.ok) {
+        const data = await response.json()
+        setKelompok(data)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal memuat data kelompok', variant: 'destructive' })
+    }
   }
 
-  const handleAddKelompok = () => {
-    const namaKelompok = prompt('Masukkan nama kelompok:')
-    const namaDesa = prompt('Masukkan nama desa:')
-    const target = prompt('Masukkan target putra:')
+  const handleDesaSubmit = async (data: { nama_desa: string }) => {
+    setIsLoading(true)
+    try {
+      const url = editingDesa ? '/api/desa' : '/api/desa'
+      const method = editingDesa ? 'PUT' : 'POST'
+      const body = editingDesa ? { ...data, id: editingDesa.id } : data
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      if (response.ok) {
+        toast({ title: 'Berhasil', description: `Desa berhasil ${editingDesa ? 'diupdate' : 'ditambahkan'}` })
+        fetchDesa()
+        fetchKelompok()
+        setIsDesaFormOpen(false)
+        setEditingDesa(null)
+      } else {
+        throw new Error('Failed to save desa')
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal menyimpan desa', variant: 'destructive' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleKelompokSubmit = async (data: { nama_kelompok: string; desa_id: number; target_putra: number }) => {
+    setIsLoading(true)
+    try {
+      const url = '/api/kelompok'
+      const method = editingKelompok ? 'PUT' : 'POST'
+      const body = editingKelompok ? { ...data, id: editingKelompok.id } : data
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      if (response.ok) {
+        toast({ title: 'Berhasil', description: `Kelompok berhasil ${editingKelompok ? 'diupdate' : 'ditambahkan'}` })
+        fetchKelompok()
+        fetchDesa()
+        setIsKelompokFormOpen(false)
+        setEditingKelompok(null)
+      } else {
+        throw new Error('Failed to save kelompok')
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal menyimpan kelompok', variant: 'destructive' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteDesa = async (id: number) => {
+    if (!confirm('Yakin ingin menghapus desa ini?')) return
     
-    if (namaKelompok && namaDesa && target) {
-      alert(`Kelompok "${namaKelompok}" di desa "${namaDesa}" dengan target ${target} berhasil ditambahkan`)
+    try {
+      const response = await fetch(`/api/desa?id=${id}`, { method: 'DELETE' })
+      if (response.ok) {
+        toast({ title: 'Berhasil', description: 'Desa berhasil dihapus' })
+        fetchDesa()
+        fetchKelompok()
+      } else {
+        throw new Error('Failed to delete desa')
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal menghapus desa', variant: 'destructive' })
     }
   }
 
-  const handleEditKelompok = (kelompokId: number) => {
-    alert(`Edit kelompok dengan ID: ${kelompokId}`)
+  const handleDeleteKelompok = async (id: number) => {
+    if (!confirm('Yakin ingin menghapus kelompok ini?')) return
+    
+    try {
+      const response = await fetch(`/api/kelompok?id=${id}`, { method: 'DELETE' })
+      if (response.ok) {
+        toast({ title: 'Berhasil', description: 'Kelompok berhasil dihapus' })
+        fetchKelompok()
+        fetchDesa()
+      } else {
+        throw new Error('Failed to delete kelompok')
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Gagal menghapus kelompok', variant: 'destructive' })
+    }
   }
 
   return (
@@ -58,28 +169,40 @@ export default function MasterDataPage() {
               <Building2 className="h-5 w-5" />
               Data Desa
             </CardTitle>
-            <Button size="sm" onClick={handleAddDesa}>
+            <Button size="sm" onClick={() => setIsDesaFormOpen(true)}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {mockDesa.map((desa) => (
-                <div key={desa.id} className="flex items-center justify-between p-2 border rounded">
+              {desa.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
-                    <p className="font-medium">{desa.nama_desa}</p>
+                    <p className="font-medium">{item.nama_desa}</p>
                     <p className="text-sm text-muted-foreground">
-                      {desa.kelompok_count} kelompok
+                      {item.kelompok_count} kelompok
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleEditDesa(desa.id)}
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setEditingDesa(item)
+                        setIsDesaFormOpen(true)
+                      }}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteDesa(item.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -92,34 +215,69 @@ export default function MasterDataPage() {
               <Users className="h-5 w-5" />
               Data Kelompok
             </CardTitle>
-            <Button size="sm" onClick={handleAddKelompok}>
+            <Button size="sm" onClick={() => setIsKelompokFormOpen(true)}>
               <Plus className="mr-2 h-3 w-3" />
               Tambah
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {mockKelompok.map((kelompok) => (
-                <div key={kelompok.id} className="flex items-center justify-between p-2 border rounded">
+              {kelompok.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-2 border rounded">
                   <div>
-                    <p className="font-medium">{kelompok.nama_kelompok}</p>
+                    <p className="font-medium">{item.nama_kelompok}</p>
                     <p className="text-sm text-muted-foreground">
-                      {kelompok.desa_name} • Target: {kelompok.target_putra}
+                      {item.desa_name} • Target: {item.target_putra}
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleEditKelompok(kelompok.id)}
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setEditingKelompok(item)
+                        setIsKelompokFormOpen(true)
+                      }}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteKelompok(item.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <DesaForm
+        isOpen={isDesaFormOpen}
+        onClose={() => {
+          setIsDesaFormOpen(false)
+          setEditingDesa(null)
+        }}
+        onSubmit={handleDesaSubmit}
+        initialData={editingDesa || undefined}
+        isLoading={isLoading}
+      />
+
+      <KelompokForm
+        isOpen={isKelompokFormOpen}
+        onClose={() => {
+          setIsKelompokFormOpen(false)
+          setEditingKelompok(null)
+        }}
+        onSubmit={handleKelompokSubmit}
+        initialData={editingKelompok || undefined}
+        desaList={desa}
+        isLoading={isLoading}
+      />
     </div>
   )
 }
