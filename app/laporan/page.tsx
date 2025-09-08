@@ -8,7 +8,7 @@ import { BarChart3, Download, FileText, Calendar } from 'lucide-react'
 
 export default function LaporanPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
-  const [selectedYear, setSelectedYear] = useState('2024')
+  const [selectedYear, setSelectedYear] = useState('2025')
   const [laporanData, setLaporanData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -121,9 +121,14 @@ export default function LaporanPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const year = 2025 + i
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
             </div>
