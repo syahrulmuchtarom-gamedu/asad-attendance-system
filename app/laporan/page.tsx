@@ -6,18 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BarChart3, Download, FileText, Calendar } from 'lucide-react'
 
-// Data desa dengan target per kelompok (25 orang per kelompok)
-const DESA_DATA = {
-  'Kapuk Melati': 3, // 3 kelompok x 25 = 75 target
-  'Jelambar': 4, // 4 kelompok x 25 = 100 target
-  'Cengkareng': 3, // 3 kelompok x 25 = 75 target
-  'Kebon Jahe': 4, // 4 kelompok x 25 = 100 target
-  'Bandara': 3, // 3 kelompok x 25 = 75 target
-  'Taman Kota': 4, // 4 kelompok x 25 = 100 target
-  'Kalideres': 5, // 5 kelompok x 25 = 125 target
-  'Cipondoh': 4, // 4 kelompok x 25 = 100 target
-}
-
 export default function LaporanPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
   const [selectedYear, setSelectedYear] = useState('2024')
@@ -34,45 +22,23 @@ export default function LaporanPage() {
       const response = await fetch(`/api/absensi?bulan=${selectedMonth}&tahun=${selectedYear}`)
       const result = await response.json()
       
-      // Generate laporan per desa dari data absensi
-      const laporanPerDesa = Object.keys(DESA_DATA).map(namaDesa => {
-        const jumlahKelompok = DESA_DATA[namaDesa as keyof typeof DESA_DATA]
-        const target = jumlahKelompok * 25
-        
-        // Simulasi data hadir (karena belum ada data real)
-        // Dalam implementasi real, hitung dari result.data
-        const hadir = Math.floor(target * (0.75 + Math.random() * 0.25)) // 75-100% kehadiran
-        const persentase = (hadir / target) * 100
-        
-        return {
-          desa: namaDesa,
-          target,
-          hadir,
-          persentase
-        }
-      })
-      
-      setLaporanData(laporanPerDesa)
+      if (response.ok && result.data && result.data.length > 0) {
+        // Gunakan data real dari database
+        setLaporanData(result.data)
+      } else {
+        // Jika belum ada data, tampilkan pesan kosong
+        setLaporanData([])
+      }
     } catch (error) {
       console.error('Error fetching laporan:', error)
-      // Fallback ke mock data jika API gagal
-      setLaporanData([
-        { desa: 'Kapuk Melati', target: 75, hadir: 68, persentase: 90.7 },
-        { desa: 'Jelambar', target: 100, hadir: 85, persentase: 85.0 },
-        { desa: 'Cengkareng', target: 75, hadir: 72, persentase: 96.0 },
-        { desa: 'Kebon Jahe', target: 100, hadir: 78, persentase: 78.0 },
-        { desa: 'Bandara', target: 75, hadir: 65, persentase: 86.7 },
-        { desa: 'Taman Kota', target: 100, hadir: 92, persentase: 92.0 },
-        { desa: 'Kalideres', target: 125, hadir: 110, persentase: 88.0 },
-        { desa: 'Cipondoh', target: 100, hadir: 88, persentase: 88.0 },
-      ])
+      setLaporanData([])
     } finally {
       setLoading(false)
     }
   }
 
-  const totalTarget = laporanData.reduce((sum, item) => sum + item.target, 0)
-  const totalHadir = laporanData.reduce((sum, item) => sum + item.hadir, 0)
+  const totalTarget = laporanData.reduce((sum, item) => sum + (item.target || 0), 0)
+  const totalHadir = laporanData.reduce((sum, item) => sum + (item.hadir || 0), 0)
   const overallPercentage = totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0
 
   const handleExportPDF = () => {
@@ -85,6 +51,10 @@ export default function LaporanPage() {
 
   const handlePrint = () => {
     window.print()
+  }
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>
   }
 
   return (
@@ -195,8 +165,8 @@ export default function LaporanPage() {
             <CardTitle className="text-sm font-medium">Periode</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Des</div>
-            <p className="text-xs text-muted-foreground">2024</p>
+            <div className="text-2xl font-bold">{selectedMonth}</div>
+            <p className="text-xs text-muted-foreground">{selectedYear}</p>
           </CardContent>
         </Card>
       </div>
@@ -210,57 +180,73 @@ export default function LaporanPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3 font-medium">Desa</th>
-                  <th className="text-center p-3 font-medium">Target</th>
-                  <th className="text-center p-3 font-medium">Hadir</th>
-                  <th className="text-center p-3 font-medium">Persentase</th>
-                  <th className="text-center p-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {laporanData.map((item, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{item.desa}</td>
-                    <td className="p-3 text-center">{item.target}</td>
-                    <td className="p-3 text-center">{item.hadir}</td>
-                    <td className="p-3 text-center font-bold">{item.persentase.toFixed(1)}%</td>
-                    <td className="p-3 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.persentase >= 90 ? 'bg-green-100 text-green-800' :
-                        item.persentase >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {item.persentase >= 90 ? 'Sangat Baik' :
-                         item.persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
-                      </span>
-                    </td>
+          {laporanData.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                Belum ada data absensi untuk periode {selectedMonth}/{selectedYear}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Silakan input data absensi terlebih dahulu
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-medium">Desa</th>
+                    <th className="text-center p-3 font-medium">Target</th>
+                    <th className="text-center p-3 font-medium">Hadir</th>
+                    <th className="text-center p-3 font-medium">Persentase</th>
+                    <th className="text-center p-3 font-medium">Status</th>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 bg-gray-50">
-                  <td className="p-3 font-bold">TOTAL</td>
-                  <td className="p-3 text-center font-bold">{totalTarget}</td>
-                  <td className="p-3 text-center font-bold">{totalHadir}</td>
-                  <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
-                  <td className="p-3 text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      overallPercentage >= 90 ? 'bg-green-100 text-green-800' :
-                      overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {overallPercentage >= 90 ? 'Sangat Baik' :
-                       overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
-                    </span>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {laporanData.map((item, index) => {
+                    const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
+                    return (
+                      <tr key={index} className="border-b hover:bg-gray-50">
+                        <td className="p-3 font-medium">{item.desa}</td>
+                        <td className="p-3 text-center">{item.target}</td>
+                        <td className="p-3 text-center">{item.hadir}</td>
+                        <td className="p-3 text-center font-bold">{persentase.toFixed(1)}%</td>
+                        <td className="p-3 text-center">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            persentase >= 90 ? 'bg-green-100 text-green-800' :
+                            persentase >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {persentase >= 90 ? 'Sangat Baik' :
+                             persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                {laporanData.length > 0 && (
+                  <tfoot>
+                    <tr className="border-t-2 bg-gray-50">
+                      <td className="p-3 font-bold">TOTAL</td>
+                      <td className="p-3 text-center font-bold">{totalTarget}</td>
+                      <td className="p-3 text-center font-bold">{totalHadir}</td>
+                      <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
+                      <td className="p-3 text-center">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          overallPercentage >= 90 ? 'bg-green-100 text-green-800' :
+                          overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {overallPercentage >= 90 ? 'Sangat Baik' :
+                           overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                        </span>
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
