@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Insert new data
+    // Insert new data (tanpa target_putra/target_putri)
     const { data: newAbsensi, error } = await supabase
       .from('absensi')
       .insert({
@@ -65,8 +65,6 @@ export async function POST(request: NextRequest) {
         tahun: data.tahun,
         hadir_putra: data.hadir_putra,
         hadir_putri: data.hadir_putri,
-        target_putra: data.target_putra,
-        target_putri: data.target_putri,
         input_by: user.id
       })
       .select()
