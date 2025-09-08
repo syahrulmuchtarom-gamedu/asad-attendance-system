@@ -14,7 +14,7 @@ const mockLaporanDesa = [
 
 export default function LaporanDesaPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
-  const [selectedYear, setSelectedYear] = useState('2024')
+  const [selectedYear, setSelectedYear] = useState('2025')
 
   const totalTargetPutra = mockLaporanDesa.reduce((sum, item) => sum + item.target_putra, 0)
   const totalHadirPutra = mockLaporanDesa.reduce((sum, item) => sum + item.hadir_putra, 0)
@@ -96,9 +96,14 @@ export default function LaporanDesaPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const year = 2025 + i
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
             </div>

@@ -4,18 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
 export default async function SuperAdminDashboard() {
-  const cookieStore = cookies()
-  const sessionCookie = cookieStore.get('user_session')?.value
-  
-  if (!sessionCookie) {
-    redirect('/login')
-  }
+  try {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      redirect('/login')
+    }
 
-  const user = JSON.parse(sessionCookie)
-  
-  if (user.role !== 'super_admin') {
-    redirect('/dashboard')
-  }
+    let user
+    try {
+      user = JSON.parse(sessionCookie)
+    } catch (e) {
+      redirect('/login')
+    }
+    
+    if (!user || user.role !== 'super_admin') {
+      redirect('/dashboard')
+    }
 
   return (
     <div className="space-y-6">
@@ -81,4 +87,8 @@ export default async function SuperAdminDashboard() {
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Dashboard error:', error)
+    redirect('/login')
+  }
 }

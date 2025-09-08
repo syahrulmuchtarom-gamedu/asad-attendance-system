@@ -4,18 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Users, Target, TrendingUp } from 'lucide-react'
 
 export default async function KoordinatorDaerahDashboard() {
-  const cookieStore = cookies()
-  const sessionCookie = cookieStore.get('user_session')?.value
-  
-  if (!sessionCookie) {
-    redirect('/login')
-  }
+  try {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      redirect('/login')
+    }
 
-  const user = JSON.parse(sessionCookie)
-  
-  if (user.role !== 'koordinator_daerah') {
-    redirect('/dashboard')
-  }
+    let user
+    try {
+      user = JSON.parse(sessionCookie)
+    } catch (e) {
+      redirect('/login')
+    }
+    
+    if (!user || user.role !== 'koordinator_daerah') {
+      redirect('/dashboard')
+    }
 
   return (
     <div className="space-y-6">
@@ -81,4 +87,8 @@ export default async function KoordinatorDaerahDashboard() {
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Dashboard error:', error)
+    redirect('/login')
+  }
 }
