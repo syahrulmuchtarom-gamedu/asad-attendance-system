@@ -14,7 +14,19 @@ export default async function DashboardPage() {
 
     const user = JSON.parse(sessionCookie)
 
-    // Show fallback dashboard instead of redirecting
+    // Redirect to role-specific dashboard
+    switch (user.role) {
+      case 'super_admin':
+        redirect('/dashboard/super-admin')
+      case 'koordinator_desa':
+        redirect('/dashboard/koordinator-desa')
+      case 'koordinator_daerah':
+        redirect('/dashboard/koordinator-daerah')
+      case 'viewer':
+        redirect('/dashboard/viewer')
+      default:
+        break
+    }
 
     // Fallback dashboard for unknown roles
     return (
