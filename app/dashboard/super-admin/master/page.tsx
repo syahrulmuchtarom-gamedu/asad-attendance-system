@@ -228,7 +228,7 @@ export default function MasterDataPage() {
                   <div>
                     <p className="font-medium">{item.nama_kelompok}</p>
                     <p className="text-sm text-muted-foreground">
-                      {item.desa_name} • Putra: {item.target_putra} • Putri: {item.target_putri}
+                      {item.desa_name} • Putra: {item.target_putra}{item.target_putri ? ` • Putri: ${item.target_putri}` : ''}
                     </p>
                   </div>
                   <div className="flex gap-1">
