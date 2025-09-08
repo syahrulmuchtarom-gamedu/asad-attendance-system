@@ -1,8 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
-// Mock database - in production use real database
-let absensiData: any[] = []
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const bulan = searchParams.get('bulan')
+    const tahun = searchParams.get('tahun')
+
+    const supabase = createAdminClient()
+    
+    let query = supabase.from('absensi').select('*')
+    
+    if (bulan) query = query.eq('bulan', bulan)
+    if (tahun) query = query.eq('tahun', tahun)
+    
+    const { data, error } = await query
+    
+    if (error) throw error
+    
+    return NextResponse.json({ data })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch absensi data' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,13 +39,16 @@ export async function POST(request: NextRequest) {
 
     const user = JSON.parse(sessionCookie)
     const data = await request.json()
+    const supabase = createAdminClient()
 
     // Check if data already exists
-    const existing = absensiData.find(item => 
-      item.kelompok_id === data.kelompok_id &&
-      item.bulan === data.bulan &&
-      item.tahun === data.tahun
-    )
+    const { data: existing } = await supabase
+      .from('absensi')
+      .select('*')
+      .eq('kelompok_id', data.kelompok_id)
+      .eq('bulan', data.bulan)
+      .eq('tahun', data.tahun)
+      .single()
 
     if (existing) {
       return NextResponse.json({ 
@@ -29,16 +56,23 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Add new data
-    const newAbsensi = {
-      id: absensiData.length + 1,
-      ...data,
-      input_by: user.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
+    // Insert new data
+    const { data: newAbsensi, error } = await supabase
+      .from('absensi')
+      .insert({
+        kelompok_id: data.kelompok_id,
+        bulan: data.bulan,
+        tahun: data.tahun,
+        hadir_putra: data.hadir_putra,
+        hadir_putri: data.hadir_putri,
+        target_putra: data.target_putra,
+        target_putri: data.target_putri,
+        input_by: user.id
+      })
+      .select()
+      .single()
 
-    absensiData.push(newAbsensi)
+    if (error) throw error
 
     return NextResponse.json({ 
       message: 'Data absensi berhasil disimpan',
