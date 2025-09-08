@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
@@ -16,9 +16,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    // Use admin client to bypass RLS
+    const supabase = createAdminClient()
     
-    console.log('Querying users table...')
+    console.log('Querying users table with admin client...')
 
     // Query tabel users
     const { data: user, error } = await supabase
