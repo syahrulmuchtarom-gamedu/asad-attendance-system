@@ -17,4 +17,19 @@ export const createClient = () => {
   )
 }
 
+// Admin client with service role for user management
+export const createAdminClient = () => {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        get() { return undefined },
+        set() {},
+        remove() {},
+      },
+    }
+  )
+}
+
 export const createServerSupabaseClient = createClient

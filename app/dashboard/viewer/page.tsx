@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Building2, Users, Target, TrendingUp, FileText, Eye } from 'lucide-react'
 import { formatPercentage, getMonthName } from '@/lib/utils'
 
 export default async function ViewerDashboard() {
-  const supabase = createServerSupabaseClient()
+  const supabase = createClient()
 
   const {
     data: { session },
