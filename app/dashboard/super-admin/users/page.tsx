@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Plus } from 'lucide-react'
+import { Users, Plus, Edit, Trash2 } from 'lucide-react'
 
 interface User {
   id: number
@@ -20,11 +20,13 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     full_name: '',
-    role: 'viewer'
+    role: 'viewer',
+    is_active: true
   })
 
   useEffect(() => {
@@ -48,16 +50,21 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
+      const url = editingUser ? '/api/users' : '/api/users'
+      const method = editingUser ? 'PUT' : 'POST'
+      const body = editingUser 
+        ? { ...formData, id: editingUser.id }
+        : formData
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(body)
       })
 
       if (response.ok) {
-        alert('User berhasil ditambahkan')
-        setShowForm(false)
-        setFormData({ username: '', password: '', full_name: '', role: 'viewer' })
+        alert(editingUser ? 'User berhasil diupdate' : 'User berhasil ditambahkan')
+        resetForm()
         fetchUsers()
       } else {
         const error = await response.json()
@@ -66,6 +73,44 @@ export default function UsersPage() {
     } catch (error) {
       alert('Terjadi kesalahan')
     }
+  }
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user)
+    setFormData({
+      username: user.username,
+      password: '',
+      full_name: user.full_name,
+      role: user.role,
+      is_active: user.is_active
+    })
+    setShowForm(true)
+  }
+
+  const handleDelete = async (userId: number) => {
+    if (!confirm('Yakin ingin menghapus user ini?')) return
+
+    try {
+      const response = await fetch(`/api/users?id=${userId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        alert('User berhasil dihapus')
+        fetchUsers()
+      } else {
+        const error = await response.json()
+        alert(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan')
+    }
+  }
+
+  const resetForm = () => {
+    setShowForm(false)
+    setEditingUser(null)
+    setFormData({ username: '', password: '', full_name: '', role: 'viewer', is_active: true })
   }
 
   if (loading) return <div>Loading...</div>
@@ -88,7 +133,7 @@ export default function UsersPage() {
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Tambah User Baru</CardTitle>
+            <CardTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,13 +147,15 @@ export default function UsersPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">
+                  Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  required
+                  required={!editingUser}
                 />
               </div>
               <div>
@@ -134,9 +181,22 @@ export default function UsersPage() {
                   <option value="viewer">Viewer</option>
                 </select>
               </div>
+              {editingUser && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    checked={formData.is_active}
+                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                  />
+                  <Label htmlFor="is_active">User Aktif</Label>
+                </div>
+              )}
               <div className="flex gap-2">
-                <Button type="submit">Simpan</Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                <Button type="submit">
+                  {editingUser ? 'Update' : 'Simpan'}
+                </Button>
+                <Button type="button" variant="outline" onClick={resetForm}>
                   Batal
                 </Button>
               </div>
@@ -161,6 +221,7 @@ export default function UsersPage() {
                   <th className="text-left p-3 font-medium">Nama Lengkap</th>
                   <th className="text-left p-3 font-medium">Role</th>
                   <th className="text-left p-3 font-medium">Status</th>
+                  <th className="text-left p-3 font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,6 +240,25 @@ export default function UsersPage() {
                       }`}>
                         {user.is_active ? 'Aktif' : 'Nonaktif'}
                       </span>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

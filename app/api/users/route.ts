@@ -52,3 +52,72 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = createAdminClient()
+    const { id, username, password, full_name, role, desa_id, is_active } = await request.json()
+
+    const updateData: any = {
+      username,
+      full_name,
+      role,
+      desa_id: role === 'koordinator_desa' ? desa_id : null,
+      is_active
+    }
+
+    if (password) {
+      updateData.password = password
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({ 
+      message: 'User updated successfully',
+      user 
+    })
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || 'Failed to update user' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = createAdminClient()
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      )
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    return NextResponse.json({ 
+      message: 'User deleted successfully'
+    })
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete user' },
+      { status: 500 }
+    )
+  }
+}
