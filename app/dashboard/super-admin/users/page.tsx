@@ -1,50 +1,74 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Users, Plus } from 'lucide-react'
 
-const mockUsers = [
-  { id: 1, username: 'admin', full_name: 'Super Admin', role: 'super_admin', desa_name: '-' },
-  { id: 2, username: 'koordinator1', full_name: 'Koordinator Kapuk Melati', role: 'koordinator_desa', desa_name: 'Kapuk Melati' },
-  { id: 3, username: 'koordinator2', full_name: 'Koordinator Jelambar', role: 'koordinator_desa', desa_name: 'Jelambar' },
-]
+interface User {
+  id: number
+  username: string
+  full_name: string
+  role: string
+  desa_id?: number
+  is_active: boolean
+}
 
 export default function UsersPage() {
-  const [users, setUsers] = useState(mockUsers)
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    full_name: '',
+    role: 'viewer'
+  })
 
-  const handleAddUser = () => {
-    const username = prompt('Masukkan username:')
-    const fullName = prompt('Masukkan nama lengkap:')
-    const role = prompt('Masukkan role (super_admin/koordinator_desa/koordinator_daerah/viewer):')
-    
-    if (username && fullName && role) {
-      const newUser = {
-        id: users.length + 1,
-        username,
-        full_name: fullName,
-        role,
-        desa_name: role === 'koordinator_desa' ? 'Desa Baru' : '-'
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users')
+      const result = await response.json()
+      if (response.ok) {
+        setUsers(result.data || [])
       }
-      setUsers([...users, newUser])
-      alert('User berhasil ditambahkan')
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleEditUser = (userId: number) => {
-    alert(`Edit user dengan ID: ${userId}`)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        alert('User berhasil ditambahkan')
+        setShowForm(false)
+        setFormData({ username: '', password: '', full_name: '', role: 'viewer' })
+        fetchUsers()
+      } else {
+        const error = await response.json()
+        alert(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan')
+    }
   }
 
-  const handleDeleteUser = (userId: number) => {
-    if (userId === 1) {
-      alert('Super Admin tidak dapat dihapus')
-      return
-    }
-    const updatedUsers = users.filter(u => u.id !== userId)
-    setUsers(updatedUsers)
-    alert('User berhasil dihapus')
-  }
+  if (loading) return <div>Loading...</div>
 
   return (
     <div className="space-y-6">
@@ -55,17 +79,77 @@ export default function UsersPage() {
             Manajemen user dan hak akses sistem
           </p>
         </div>
-        <Button onClick={handleAddUser}>
+        <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah User
         </Button>
       </div>
 
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tambah User Baru</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) => setFormData({...formData, username: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="full_name">Nama Lengkap</Label>
+                <Input
+                  id="full_name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="role">Role</Label>
+                <select
+                  id="role"
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="super_admin">Super Admin</option>
+                  <option value="koordinator_desa">Koordinator Desa</option>
+                  <option value="koordinator_daerah">Koordinator Daerah</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit">Simpan</Button>
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  Batal
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Daftar User
+            Daftar User ({users.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -76,8 +160,7 @@ export default function UsersPage() {
                   <th className="text-left p-3 font-medium">Username</th>
                   <th className="text-left p-3 font-medium">Nama Lengkap</th>
                   <th className="text-left p-3 font-medium">Role</th>
-                  <th className="text-left p-3 font-medium">Desa</th>
-                  <th className="text-left p-3 font-medium">Aksi</th>
+                  <th className="text-left p-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,25 +173,12 @@ export default function UsersPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="p-3">{user.desa_name}</td>
                     <td className="p-3">
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEditUser(user.id)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-red-600"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user.is_active ? 'Aktif' : 'Nonaktif'}
+                      </span>
                     </td>
                   </tr>
                 ))}
