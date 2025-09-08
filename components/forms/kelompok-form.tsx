@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 interface KelompokFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: { nama_kelompok: string; desa_id: number; target_putra: number }) => void
-  initialData?: { id?: number; nama_kelompok?: string; desa_id?: number; target_putra?: number }
+  onSubmit: (data: { nama_kelompok: string; desa_id: number; target_putra: number; target_putri: number }) => void
+  initialData?: { id?: number; nama_kelompok?: string; desa_id?: number; target_putra?: number; target_putri?: number }
   desaList: Array<{ id: number; nama_desa: string }>
   isLoading?: boolean
 }
@@ -20,23 +20,26 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
   const [namaKelompok, setNamaKelompok] = useState(initialData?.nama_kelompok || '')
   const [desaId, setDesaId] = useState<string>(initialData?.desa_id?.toString() || '')
   const [targetPutra, setTargetPutra] = useState(initialData?.target_putra?.toString() || '25')
+  const [targetPutri, setTargetPutri] = useState(initialData?.target_putri?.toString() || '25')
 
   useEffect(() => {
     if (initialData) {
       setNamaKelompok(initialData.nama_kelompok || '')
       setDesaId(initialData.desa_id?.toString() || '')
       setTargetPutra(initialData.target_putra?.toString() || '25')
+      setTargetPutri(initialData.target_putri?.toString() || '25')
     }
   }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!namaKelompok.trim() || !desaId || !targetPutra) return
+    if (!namaKelompok.trim() || !desaId || !targetPutra || !targetPutri) return
     
     onSubmit({
       nama_kelompok: namaKelompok.trim(),
       desa_id: parseInt(desaId),
-      target_putra: parseInt(targetPutra)
+      target_putra: parseInt(targetPutra),
+      target_putri: parseInt(targetPutri)
     })
   }
 
@@ -44,6 +47,7 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
     setNamaKelompok('')
     setDesaId('')
     setTargetPutra('25')
+    setTargetPutri('25')
     onClose()
   }
 
@@ -94,12 +98,24 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
                 required
               />
             </div>
+            <div>
+              <Label htmlFor="target_putri">Target Putri</Label>
+              <Input
+                id="target_putri"
+                type="number"
+                value={targetPutri}
+                onChange={(e) => setTargetPutri(e.target.value)}
+                placeholder="25"
+                min="1"
+                required
+              />
+            </div>
           </div>
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={handleClose}>
               Batal
             </Button>
-            <Button type="submit" disabled={isLoading || !namaKelompok.trim() || !desaId || !targetPutra}>
+            <Button type="submit" disabled={isLoading || !namaKelompok.trim() || !desaId || !targetPutra || !targetPutri}>
               {isLoading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>

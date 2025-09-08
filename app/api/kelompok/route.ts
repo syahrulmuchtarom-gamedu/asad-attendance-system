@@ -47,15 +47,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { nama_kelompok, desa_id, target_putra } = await request.json()
+    const { nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
 
-    if (!nama_kelompok || !desa_id || !target_putra) {
+    if (!nama_kelompok || !desa_id || !target_putra || !target_putri) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('kelompok')
-      .insert([{ nama_kelompok, desa_id, target_putra }])
+      .insert([{ nama_kelompok, desa_id, target_putra, target_putri }])
       .select()
       .single()
 
@@ -79,15 +79,15 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, nama_kelompok, desa_id, target_putra } = await request.json()
+    const { id, nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
 
-    if (!id || !nama_kelompok || !desa_id || !target_putra) {
+    if (!id || !nama_kelompok || !desa_id || !target_putra || !target_putri) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('kelompok')
-      .update({ nama_kelompok, desa_id, target_putra })
+      .update({ nama_kelompok, desa_id, target_putra, target_putri })
       .eq('id', id)
       .select()
       .single()

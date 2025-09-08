@@ -20,6 +20,7 @@ interface Kelompok {
   desa_name: string
   desa_id: number
   target_putra: number
+  target_putri: number
 }
 
 export default function MasterDataPage() {
@@ -90,7 +91,7 @@ export default function MasterDataPage() {
     }
   }
 
-  const handleKelompokSubmit = async (data: { nama_kelompok: string; desa_id: number; target_putra: number }) => {
+  const handleKelompokSubmit = async (data: { nama_kelompok: string; desa_id: number; target_putra: number; target_putri: number }) => {
     setIsLoading(true)
     try {
       const url = '/api/kelompok'
@@ -227,7 +228,7 @@ export default function MasterDataPage() {
                   <div>
                     <p className="font-medium">{item.nama_kelompok}</p>
                     <p className="text-sm text-muted-foreground">
-                      {item.desa_name} • Target: {item.target_putra}
+                      {item.desa_name} • Putra: {item.target_putra} • Putri: {item.target_putri}
                     </p>
                   </div>
                   <div className="flex gap-1">
