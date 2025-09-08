@@ -1,27 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+}
 
 export async function GET() {
   try {
     const supabase = createClient()
     
+    // Simple query without complex joins
     const { data: kelompok, error } = await supabase
       .from('kelompok')
-      .select(`
-        *,
-        desa!inner(nama_desa)
-      `)
+      .select('*')
       .order('nama_kelompok')
 
-    if (error) throw error
+    if (error) {
+      console.error('Kelompok fetch error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
-    const kelompokWithDesa = kelompok?.map(k => ({
-      ...k,
-      desa_name: k.desa?.nama_desa
-    }))
+    // Get desa names separately
+    const { data: desa } = await supabase
+      .from('desa')
+      .select('id, nama_desa')
+
+    const kelompokWithDesa = (kelompok || []).map(k => {
+      const desaInfo = desa?.find(d => d.id === k.desa_id)
+      return {
+        ...k,
+        desa_name: desaInfo?.nama_desa || 'Unknown'
+      }
+    })
 
     return NextResponse.json(kelompokWithDesa)
   } catch (error) {
+    console.error('API Error:', error)
     return NextResponse.json({ error: 'Failed to fetch kelompok' }, { status: 500 })
   }
 }
@@ -38,17 +64,21 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('kelompok')
       .insert([{ nama_kelompok, desa_id, target_putra }])
-      .select(`
-        *,
-        desa(nama_desa)
-      `)
+      .select()
       .single()
 
     if (error) throw error
 
+    // Get desa name separately
+    const { data: desaData } = await supabase
+      .from('desa')
+      .select('nama_desa')
+      .eq('id', desa_id)
+      .single()
+
     return NextResponse.json({
       ...data,
-      desa_name: data.desa?.nama_desa
+      desa_name: desaData?.nama_desa || 'Unknown'
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create kelompok' }, { status: 500 })
@@ -68,17 +98,21 @@ export async function PUT(request: NextRequest) {
       .from('kelompok')
       .update({ nama_kelompok, desa_id, target_putra })
       .eq('id', id)
-      .select(`
-        *,
-        desa(nama_desa)
-      `)
+      .select()
       .single()
 
     if (error) throw error
 
+    // Get desa name separately
+    const { data: desaData } = await supabase
+      .from('desa')
+      .select('nama_desa')
+      .eq('id', desa_id)
+      .single()
+
     return NextResponse.json({
       ...data,
-      desa_name: data.desa?.nama_desa
+      desa_name: desaData?.nama_desa || 'Unknown'
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update kelompok' }, { status: 500 })

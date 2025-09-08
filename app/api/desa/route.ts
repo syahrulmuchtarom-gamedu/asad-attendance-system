@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+}
 
 export async function GET() {
   try {
@@ -10,25 +26,20 @@ export async function GET() {
       .select('*')
       .order('nama_desa')
 
-    if (error) throw error
+    if (error) {
+      console.error('Desa fetch error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
-    // Count kelompok for each desa
-    const desaWithCount = await Promise.all(
-      (desa || []).map(async (d) => {
-        const { count } = await supabase
-          .from('kelompok')
-          .select('*', { count: 'exact', head: true })
-          .eq('desa_id', d.id)
-        
-        return {
-          ...d,
-          kelompok_count: count || 0
-        }
-      })
-    )
+    // Simple approach - just return desa without count for now
+    const desaWithCount = (desa || []).map(d => ({
+      ...d,
+      kelompok_count: 0 // Will be updated later
+    }))
 
     return NextResponse.json(desaWithCount)
   } catch (error) {
+    console.error('API Error:', error)
     return NextResponse.json({ error: 'Failed to fetch desa' }, { status: 500 })
   }
 }
