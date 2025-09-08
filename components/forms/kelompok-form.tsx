@@ -33,13 +33,13 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!namaKelompok.trim() || !desaId || !targetPutra) return
+    if (!namaKelompok.trim() || !desaId || !targetPutra || !targetPutri) return
     
     onSubmit({
       nama_kelompok: namaKelompok.trim(),
       desa_id: parseInt(desaId),
       target_putra: parseInt(targetPutra),
-      target_putri: parseInt(targetPutri || '25')
+      target_putri: parseInt(targetPutri)
     })
   }
 
@@ -110,6 +110,7 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
                 onChange={(e) => setTargetPutri(e.target.value)}
                 placeholder="25"
                 min="1"
+                required
               />
             </div>
           </div>
@@ -117,7 +118,7 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
             <Button type="button" variant="outline" onClick={handleClose}>
               Batal
             </Button>
-            <Button type="submit" disabled={isLoading || !namaKelompok.trim() || !desaId || !targetPutra}>
+            <Button type="submit" disabled={isLoading || !namaKelompok.trim() || !desaId || !targetPutra || !targetPutri}>
               {isLoading ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>
