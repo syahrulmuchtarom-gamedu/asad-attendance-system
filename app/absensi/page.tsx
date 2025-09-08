@@ -17,7 +17,7 @@ interface Kelompok {
 
 export default function AbsensiPage() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedYear, setSelectedYear] = useState(2025)
   const [kelompokList, setKelompokList] = useState<Kelompok[]>([])
   const [absensiData, setAbsensiData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
   const [loading, setLoading] = useState(false)
@@ -137,8 +137,14 @@ export default function AbsensiPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const year = 2025 + i
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
             </div>
