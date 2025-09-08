@@ -1,44 +1,95 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method GET not allowed. Use POST.' },
+    { status: 405 }
+  )
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
-    
-    console.log('Login attempt for:', email)
-    
-    if (!email || !password) {
+    const { username, password } = await request.json()
+
+    if (!username || !password) {
       return NextResponse.json(
-        { error: 'Email dan password harus diisi' },
+        { error: 'Username dan password harus diisi' },
         { status: 400 }
       )
     }
 
-    const supabase = createServerSupabaseClient()
+    // Hardcoded users for testing
+    const users = [
+      {
+        id: 1,
+        username: 'admin',
+        password: 'admin123',
+        full_name: 'Super Admin',
+        role: 'super_admin',
+        desa_id: null
+      },
+      {
+        id: 2,
+        username: 'koordinator1',
+        password: 'admin123',
+        full_name: 'Koordinator Kapuk Melati',
+        role: 'koordinator_desa',
+        desa_id: 1
+      },
+      {
+        id: 3,
+        username: 'koordinator2',
+        password: 'admin123',
+        full_name: 'Koordinator Jelambar',
+        role: 'koordinator_desa',
+        desa_id: 2
+      }
+    ]
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const user = users.find(u => u.username === username && u.password === password)
 
-    if (error) {
-      console.error('Supabase auth error:', error)
+    if (!user) {
       return NextResponse.json(
-        { error: 'Email atau password salah' },
+        { error: 'Username atau password salah' },
         { status: 401 }
       )
     }
 
-    console.log('Login successful for user:', data.user.id)
+    // Set session cookie
+    const cookieStore = cookies()
+    cookieStore.set('user_session', JSON.stringify({
+      id: user.id,
+      username: user.username,
+      full_name: user.full_name,
+      role: user.role,
+      desa_id: user.desa_id
+    }), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    })
 
     return NextResponse.json({
-      message: 'Login berhasil',
-      user: data.user
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        role: user.role,
+        desa_id: user.desa_id
+      }
     })
+
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan server' },
+      { 
+        error: 'Terjadi kesalahan server',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
