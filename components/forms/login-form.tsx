@@ -29,21 +29,24 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     try {
       setIsLoading(true)
-      console.log('Submitting to /api/auth/login with:', { username: data.email })
+      
+      const loginData = {
+        username: data.email, // field name tetap email tapi isinya username
+        password: data.password,
+      }
+      
+      console.log('Login attempt:', loginData)
 
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: data.email, // field name tetap email tapi isinya username
-          password: data.password,
-        }),
+        body: JSON.stringify(loginData),
       })
       
       console.log('Response status:', response.status)
-      console.log('Response URL:', response.url)
-
+      
       const result = await response.json()
+      console.log('Response data:', result)
 
       if (!response.ok) {
         toast({
@@ -59,9 +62,10 @@ export function LoginForm() {
         description: "Selamat datang di Sistem Absensi ASAD",
       })
 
-      router.push('/dashboard')
-      router.refresh()
+      // Force reload to ensure cookie is set
+      window.location.href = '/dashboard'
     } catch (error) {
+      console.error('Login error:', error)
       toast({
         variant: "destructive",
         title: "Terjadi Kesalahan",

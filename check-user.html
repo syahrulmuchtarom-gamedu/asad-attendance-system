@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check User in Database</title>
+</head>
+<body>
+    <h1>Check User in Database</h1>
+    <button onclick="checkUser()">Check User suppcon</button>
+    <button onclick="createUser()">Create User suppcon</button>
+    <div id="result"></div>
+
+    <script>
+        async function checkUser() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Checking user...';
+            
+            try {
+                // Check via API
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'suppcon',
+                        password: 'AdInsTOPAJA2018%qaz'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <h3>✅ User Found and Login Works!</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <h3>❌ Login Failed:</h3>
+                        <p>${data.error}</p>
+                        <p>Status: ${response.status}</p>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `<h3>❌ Error:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function createUser() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Creating user...';
+            
+            try {
+                const response = await fetch('/api/create-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <h3>${response.ok ? '✅' : '❌'} Create User Result:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `<h3>❌ Error:</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

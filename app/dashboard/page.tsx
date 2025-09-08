@@ -1,32 +1,29 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
 export default async function DashboardPage() {
-  try {
-    const cookieStore = cookies()
-    const sessionCookie = cookieStore.get('user_session')?.value
-    
-    if (!sessionCookie) {
+  const cookieStore = cookies()
+  const sessionCookie = cookieStore.get('user_session')?.value
+  
+  if (!sessionCookie) {
+    redirect('/login')
+  }
+
+  const user = JSON.parse(sessionCookie)
+
+  // Redirect to role-specific dashboard
+  switch (user.role) {
+    case 'super_admin':
+      redirect('/dashboard/super-admin')
+    case 'koordinator_desa':
+      redirect('/dashboard/koordinator-desa')
+    case 'koordinator_daerah':
+      redirect('/dashboard/koordinator-daerah')
+    case 'viewer':
+      redirect('/dashboard/viewer')
+    default:
       redirect('/login')
-    }
-
-    const user = JSON.parse(sessionCookie)
-
-    // Redirect to role-specific dashboard
-    switch (user.role) {
-      case 'super_admin':
-        redirect('/dashboard/super-admin')
-      case 'koordinator_desa':
-        redirect('/dashboard/koordinator-desa')
-      case 'koordinator_daerah':
-        redirect('/dashboard/koordinator-daerah')
-      case 'viewer':
-        redirect('/dashboard/viewer')
-      default:
-        break
-    }
+  }
 
     // Fallback dashboard for unknown roles
     return (
