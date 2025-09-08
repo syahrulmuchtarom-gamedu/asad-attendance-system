@@ -1,9 +1,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Users, Target, TrendingUp, Plus, FileText } from 'lucide-react'
+import { Users, Target, TrendingUp } from 'lucide-react'
 
 export default async function KoordinatorDesaDashboard() {
   const cookieStore = cookies()
@@ -21,27 +19,11 @@ export default async function KoordinatorDesaDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard Koordinator Desa</h1>
-          <p className="text-muted-foreground">
-            Selamat datang, {user.full_name}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild>
-            <Link href="/absensi">
-              <Plus className="mr-2 h-4 w-4" />
-              Input Absensi
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/laporan">
-              <FileText className="mr-2 h-4 w-4" />
-              Lihat Laporan
-            </Link>
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard Koordinator Desa</h1>
+        <p className="text-muted-foreground">
+          Selamat datang, {user.full_name}
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
