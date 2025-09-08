@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 
-function createClient() {
-  const cookieStore = cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
     }
-  )
-}
+  }
+)
 
 export async function GET() {
   try {
-    const supabase = createClient()
     
     const { data: desa, error } = await supabase
       .from('desa')
@@ -46,7 +40,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
     const { nama_desa } = await request.json()
 
     if (!nama_desa) {
@@ -69,7 +62,6 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createClient()
     const { id, nama_desa } = await request.json()
 
     if (!id || !nama_desa) {
@@ -93,7 +85,6 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
