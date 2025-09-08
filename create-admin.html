@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Admin User</title>
+</head>
+<body>
+    <h1>Create Admin User</h1>
+    <button onclick="createAdmin()">Create Admin User</button>
+    <div id="result"></div>
+
+    <script>
+        async function createAdmin() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Creating user...';
+            
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'suppcon@admin.com',
+                        password: 'AdInsTOPAJA2018%qaz',
+                        full_name: 'Super Admin',
+                        role: 'super_admin',
+                        desa_id: null
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <h3>✅ User Created Successfully!</h3>
+                        <p><strong>Email:</strong> suppcon@admin.com</p>
+                        <p><strong>Password:</strong> AdInsTOPAJA2018%qaz</p>
+                        <p><strong>Role:</strong> super_admin</p>
+                    `;
+                } else {
+                    result.innerHTML = `<h3>❌ Error:</h3><p>${data.error}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<h3>❌ Error:</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
