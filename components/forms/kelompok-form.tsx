@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 
 interface KelompokFormProps {
   isOpen: boolean
@@ -58,6 +58,9 @@ export function KelompokForm({ isOpen, onClose, onSubmit, initialData, desaList,
           <DialogTitle>
             {initialData?.id ? 'Edit Kelompok' : 'Tambah Kelompok'}
           </DialogTitle>
+          <DialogDescription>
+            {initialData?.id ? 'Ubah data kelompok' : 'Tambahkan kelompok baru dengan target putra dan putri'}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
