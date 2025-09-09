@@ -126,3 +126,62 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
+    const data = await request.json()
+    const supabase = createAdminClient()
+
+    // Validasi: koordinator desa hanya bisa update untuk kelompok di desanya
+    if (user.role === 'koordinator_desa') {
+      const { data: kelompok } = await supabase
+        .from('kelompok')
+        .select('desa_id')
+        .eq('id', data.kelompok_id)
+        .single()
+      
+      if (!kelompok || kelompok.desa_id !== user.desa_id) {
+        return NextResponse.json({ 
+          error: 'Anda tidak memiliki akses untuk kelompok ini' 
+        }, { status: 403 })
+      }
+    }
+
+    // Update existing data
+    const { data: updatedAbsensi, error } = await supabase
+      .from('absensi')
+      .update({
+        hadir_putra: data.hadir_putra,
+        hadir_putri: data.hadir_putri,
+        updated_at: new Date().toISOString()
+      })
+      .eq('kelompok_id', data.kelompok_id)
+      .eq('bulan', data.bulan)
+      .eq('tahun', data.tahun)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Update absensi error:', error)
+      throw error
+    }
+
+    return NextResponse.json({ 
+      message: 'Data absensi berhasil diupdate',
+      data: updatedAbsensi 
+    })
+  } catch (error) {
+    console.error('PUT API Error:', error)
+    return NextResponse.json({ 
+      error: 'Gagal mengupdate data' 
+    }, { status: 500 })
+  }
+}

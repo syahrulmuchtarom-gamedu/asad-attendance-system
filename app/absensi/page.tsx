@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Users, Calendar, Save } from 'lucide-react'
+import { Users, Calendar, Save, Edit, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface Kelompok {
   id: number
@@ -20,24 +20,71 @@ export default function AbsensiPage() {
   const [selectedYear, setSelectedYear] = useState(2025)
   const [kelompokList, setKelompokList] = useState<Kelompok[]>([])
   const [absensiData, setAbsensiData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
+  const [existingData, setExistingData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
   const [loading, setLoading] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [dataStatus, setDataStatus] = useState<'loading' | 'new' | 'existing'>('loading')
 
   useEffect(() => {
-    // Fetch kelompok berdasarkan desa user
-    const fetchKelompok = async () => {
-      try {
-        const response = await fetch('/api/kelompok')
-        if (response.ok) {
-          const data = await response.json()
-          setKelompokList(data)
-        }
-      } catch (error) {
-        console.error('Error fetching kelompok:', error)
-      }
-    }
-    
     fetchKelompok()
   }, [])
+
+  useEffect(() => {
+    if (kelompokList.length > 0) {
+      fetchExistingData()
+    }
+  }, [selectedMonth, selectedYear, kelompokList])
+
+  const fetchKelompok = async () => {
+    try {
+      const response = await fetch('/api/kelompok')
+      if (response.ok) {
+        const data = await response.json()
+        setKelompokList(data)
+      }
+    } catch (error) {
+      console.error('Error fetching kelompok:', error)
+    }
+  }
+
+  const fetchExistingData = async () => {
+    try {
+      setDataStatus('loading')
+      const response = await fetch(`/api/absensi?bulan=${selectedMonth}&tahun=${selectedYear}`)
+      const result = await response.json()
+      
+      if (response.ok && result.data && result.data.length > 0) {
+        // Ada data existing - mode edit
+        const existingMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
+        const inputMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
+        
+        result.data.forEach((item: any) => {
+          existingMap[item.kelompok_id] = {
+            hadir_putra: item.hadir_putra || 0,
+            hadir_putri: item.hadir_putri || 0
+          }
+          inputMap[item.kelompok_id] = {
+            hadir_putra: item.hadir_putra || 0,
+            hadir_putri: item.hadir_putri || 0
+          }
+        })
+        
+        setExistingData(existingMap)
+        setAbsensiData(inputMap)
+        setIsEditMode(true)
+        setDataStatus('existing')
+      } else {
+        // Tidak ada data - mode input baru
+        setExistingData({})
+        setAbsensiData({})
+        setIsEditMode(false)
+        setDataStatus('new')
+      }
+    } catch (error) {
+      console.error('Error fetching existing data:', error)
+      setDataStatus('new')
+    }
+  }
 
   const handleInputChange = (kelompokId: number, field: 'hadir_putra' | 'hadir_putri', value: string) => {
     const numValue = parseInt(value) || 0
@@ -54,30 +101,58 @@ export default function AbsensiPage() {
     try {
       setLoading(true)
       
-      for (const kelompok of kelompokList) {
-        const data = absensiData[kelompok.id]
-        if (data && (data.hadir_putra > 0 || data.hadir_putri > 0)) {
-          const response = await fetch('/api/absensi', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              kelompok_id: kelompok.id,
-              bulan: selectedMonth,
-              tahun: selectedYear,
-              hadir_putra: data.hadir_putra || 0,
-              hadir_putri: data.hadir_putri || 0
+      if (isEditMode) {
+        // Mode UPDATE - gunakan PUT method
+        for (const kelompok of kelompokList) {
+          const data = absensiData[kelompok.id]
+          if (data !== undefined) {
+            const response = await fetch('/api/absensi', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                kelompok_id: kelompok.id,
+                bulan: selectedMonth,
+                tahun: selectedYear,
+                hadir_putra: data.hadir_putra || 0,
+                hadir_putri: data.hadir_putri || 0
+              })
             })
-          })
 
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error)
+            if (!response.ok) {
+              const error = await response.json()
+              throw new Error(error.error)
+            }
           }
         }
-      }
+        alert('Data absensi berhasil diupdate!')
+      } else {
+        // Mode INSERT - gunakan POST method
+        for (const kelompok of kelompokList) {
+          const data = absensiData[kelompok.id]
+          if (data && (data.hadir_putra > 0 || data.hadir_putri > 0)) {
+            const response = await fetch('/api/absensi', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                kelompok_id: kelompok.id,
+                bulan: selectedMonth,
+                tahun: selectedYear,
+                hadir_putra: data.hadir_putra || 0,
+                hadir_putri: data.hadir_putri || 0
+              })
+            })
 
-      alert('Data absensi berhasil disimpan!')
-      setAbsensiData({})
+            if (!response.ok) {
+              const error = await response.json()
+              throw new Error(error.error)
+            }
+          }
+        }
+        alert('Data absensi berhasil disimpan!')
+      }
+      
+      // Refresh data setelah submit
+      await fetchExistingData()
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
@@ -107,9 +182,26 @@ export default function AbsensiPage() {
       {/* Filter Periode */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Periode Absensi
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Periode Absensi
+            </div>
+            {dataStatus !== 'loading' && (
+              <div className="flex items-center gap-2">
+                {dataStatus === 'existing' ? (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    <CheckCircle className="h-4 w-4" />
+                    Data Tersimpan
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    Belum Ada Data
+                  </div>
+                )}
+              </div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -201,41 +293,76 @@ export default function AbsensiPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {kelompokList.map((kelompok) => (
-              <div key={kelompok.id} className="border rounded-lg p-4">
-                <h3 className="font-medium mb-3">{kelompok.nama_kelompok}</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <Label>Hadir Putra (Target: {kelompok.target_putra})</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max={kelompok.target_putra}
-                      value={absensiData[kelompok.id]?.hadir_putra || ''}
-                      onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
-                      placeholder="0"
-                    />
+            {kelompokList.map((kelompok) => {
+              const hasExistingData = existingData[kelompok.id] !== undefined
+              const currentData = absensiData[kelompok.id]
+              const isDataChanged = hasExistingData && currentData && (
+                currentData.hadir_putra !== existingData[kelompok.id]?.hadir_putra ||
+                currentData.hadir_putri !== existingData[kelompok.id]?.hadir_putri
+              )
+              
+              return (
+                <div key={kelompok.id} className={`border rounded-lg p-4 ${
+                  hasExistingData ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                } ${isDataChanged ? 'border-blue-300 bg-blue-50' : ''}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">{kelompok.nama_kelompok}</h3>
+                    {hasExistingData && (
+                      <div className="flex items-center gap-1 text-xs text-green-600">
+                        <CheckCircle className="h-3 w-3" />
+                        Tersimpan
+                      </div>
+                    )}
+                    {isDataChanged && (
+                      <div className="flex items-center gap-1 text-xs text-blue-600">
+                        <Edit className="h-3 w-3" />
+                        Diubah
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <Label>Hadir Putri (Target: {kelompok.target_putri})</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max={kelompok.target_putri}
-                      value={absensiData[kelompok.id]?.hadir_putri || ''}
-                      onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
-                      placeholder="0"
-                    />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label>Hadir Putra (Target: {kelompok.target_putra})</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max={kelompok.target_putra}
+                        value={absensiData[kelompok.id]?.hadir_putra ?? ''}
+                        onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
+                        placeholder="0"
+                        className={hasExistingData ? 'bg-white border-green-300' : ''}
+                      />
+                    </div>
+                    <div>
+                      <Label>Hadir Putri (Target: {kelompok.target_putri})</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max={kelompok.target_putri}
+                        value={absensiData[kelompok.id]?.hadir_putri ?? ''}
+                        onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
+                        placeholder="0"
+                        className={hasExistingData ? 'bg-white border-green-300' : ''}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
           
           <div className="mt-6 flex justify-end">
-            <Button onClick={handleSubmit} disabled={loading}>
-              <Save className="mr-2 h-4 w-4" />
-              {loading ? 'Menyimpan...' : 'Simpan Data'}
+            <Button onClick={handleSubmit} disabled={loading || dataStatus === 'loading'}>
+              {isEditMode ? (
+                <Edit className="mr-2 h-4 w-4" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              {loading ? (
+                isEditMode ? 'Mengupdate...' : 'Menyimpan...'
+              ) : (
+                isEditMode ? 'Update Data' : 'Simpan Data'
+              )}
             </Button>
           </div>
         </CardContent>
