@@ -212,61 +212,35 @@ export default function AbsensiPage() {
     try {
       setLoading(true)
       
-      if (isEditMode) {
-        // Mode UPDATE - gunakan PUT method
-        for (const kelompok of kelompokList) {
-          const data = absensiData[kelompok.id]
-          if (data !== undefined) {
-            const response = await fetch('/api/absensi', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                kelompok_id: kelompok.id,
-                bulan: selectedMonth,
-                tahun: selectedYear,
-                hadir_putra: data.hadir_putra || 0,
-                hadir_putri: data.hadir_putri || 0
-              })
+      // Selalu gunakan PUT method untuk UPSERT functionality
+      for (const kelompok of kelompokList) {
+        const data = absensiData[kelompok.id]
+        if (data !== undefined && (data.hadir_putra >= 0 || data.hadir_putri >= 0)) {
+          const response = await fetch('/api/absensi', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              kelompok_id: kelompok.id,
+              bulan: selectedMonth,
+              tahun: selectedYear,
+              hadir_putra: data.hadir_putra || 0,
+              hadir_putri: data.hadir_putri || 0
             })
+          })
 
-            if (!response.ok) {
-              const error = await response.json()
-              throw new Error(error.error)
-            }
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error)
           }
         }
-        alert('Data absensi berhasil diupdate!')
-      } else {
-        // Mode INSERT - gunakan POST method
-        for (const kelompok of kelompokList) {
-          const data = absensiData[kelompok.id]
-          if (data && (data.hadir_putra > 0 || data.hadir_putri > 0)) {
-            const response = await fetch('/api/absensi', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                kelompok_id: kelompok.id,
-                bulan: selectedMonth,
-                tahun: selectedYear,
-                hadir_putra: data.hadir_putra || 0,
-                hadir_putri: data.hadir_putri || 0
-              })
-            })
-
-            if (!response.ok) {
-              const error = await response.json()
-              throw new Error(error.error)
-            }
-          }
-        }
-        alert('Data absensi berhasil disimpan!')
       }
+      alert('Data absensi berhasil disimpan!')
       
       // Refresh data setelah submit
       await fetchExistingData()
       
-      // Jika mode insert berhasil dan bukan super admin, pindah ke bulan saat ini
-      if (!isEditMode && userRole !== 'super_admin') {
+      // Jika bukan super admin, pindah ke bulan saat ini setelah submit
+      if (userRole !== 'super_admin') {
         const currentMonth = new Date().getMonth() + 1
         const currentYear = new Date().getFullYear()
         setSelectedMonth(currentMonth)
@@ -618,16 +592,8 @@ export default function AbsensiPage() {
               onClick={handleSubmit} 
               disabled={loading || dataStatus === 'loading' || kelompokList.length === 0}
             >
-              {isEditMode ? (
-                <Edit className="mr-2 h-4 w-4" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {loading ? (
-                isEditMode ? 'Mengupdate...' : 'Menyimpan...'
-              ) : (
-                isEditMode ? 'Update Data' : 'Simpan Data'
-              )}
+              <Save className="mr-2 h-4 w-4" />
+              {loading ? 'Menyimpan...' : 'Simpan Data'}
             </Button>
           </div>
         </CardContent>

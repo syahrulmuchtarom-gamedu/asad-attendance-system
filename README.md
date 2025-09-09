@@ -1,62 +1,67 @@
 # Sistem Absensi ASAD
 
-Sistem absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa > Kelompok. Sistem mendukung input absensi bulanan dengan perhitungan persentase kehadiran otomatis.
+Sistem absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa > Kelompok. Sistem mendukung input absensi bulanan dengan perhitungan persentase kehadiran otomatis dan fitur drill-down laporan.
 
 ## 🚀 Fitur Utama
 
 ### Authentication & Authorization
-- **Super Admin**: Kelola semua data, user management, master data
-- **Koordinator Desa**: Input absensi untuk kelompok di desanya
+- **Super Admin**: Kelola semua data, user management, master data, input absensi semua desa
+- **Koordinator Desa**: Input absensi untuk kelompok di desanya saja
 - **Koordinator Daerah**: View semua laporan daerah
 - **Viewer**: View dan print laporan
 
 ### Dashboard per Role
-- **Super Admin**: Overview semua desa, user management, master data
-- **Koordinator Desa**: Form input absensi + history desa
+- **Super Admin**: Overview semua desa, user management, master data, input absensi per desa
+- **Koordinator Desa**: Form input absensi langsung untuk kelompok desanya
 - **Koordinator Daerah**: Laporan real-time semua desa
 - **Viewer**: Laporan read-only dengan fungsi print
 
-### Input Absensi
-- Form input per desa dengan daftar kelompok
-- Pilihan bulan/tahun
-- Input terpisah untuk Putra (minggu ke-2) dan Putri (minggu ke-4)
-- Validasi: tidak boleh input duplikat untuk bulan yang sama
-- Auto-save dan konfirmasi sebelum submit
+### Input Absensi dengan Desa Selector
+- **Super Admin**: Pilih desa dari grid card → Input kelompok desa tersebut
+- **Koordinator Desa**: Langsung form input kelompok desanya
+- UPSERT functionality: Auto-detect insert baru atau update existing
+- Input terpisah untuk Putra dan Putri per kelompok
+- Indikator visual: data tersimpan (hijau), data diubah (biru)
+- Validasi target maksimal per kelompok
 
 ### Perhitungan Otomatis
 - Persentase per kelompok: (hadir/target) × 100%
 - Persentase per desa: total hadir semua kelompok/total target desa
-- Persentase daerah: total hadir semua desa/total target daerah (750 orang)
+- Agregasi real-time saat input data
+- Summary cards: Total Target, Total Hadir, Persentase
 
-### Laporan & Export
-- Tabel responsif dengan filter bulan/tahun
-- Chart visualization (bar chart, pie chart)
-- Export ke PDF dan Excel
+### Laporan dengan Drill-Down
+- **Laporan Kehadiran**: Tabel per desa dengan drill-down ke detail kelompok
+- **Klik nama desa** → Modal pop-up detail kelompok (putra/putri terpisah)
+- Filter bulan/tahun dengan data real-time
+- Status indikator: Sangat Baik (≥90%), Baik (≥80%), Perlu Perbaikan (<80%)
+- Export ke PDF dan Excel (planned)
 - Print-friendly layout
-- Real-time update data
 
 ## 🛠 Tech Stack
 
 - **Frontend**: Next.js 14 dengan App Router
 - **Styling**: Tailwind CSS + Shadcn/ui components
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
+- **Authentication**: Custom session dengan Cookie + localStorage fallback
+- **State Management**: React useState/useEffect
 - **Deployment**: Vercel
 - **Repository**: GitHub
 
 ## 📊 Struktur Data
 
 ### Desa dan Kelompok:
-1. **Kapuk Melati**: Melati A, Melati B, BGN
-2. **Jelambar**: Indah, Damar, Jaya, Pejagalan
-3. **Cengkareng**: Fajar A, Fajar B, Fajar C
-4. **Kebon Jahe**: Kebon Jahe A, Kebon Jahe B, Garikas, Taniwan
-5. **Bandara**: Rawel, Prima, Kamdur
-6. **Taman Kota**: Rawa Buaya A, Rawa Buaya B, Taman Kota A, Taman Kota B
-7. **Kalideres**: Tegal Alur A, Tegal Alur B, Prepedan A, Prepedan B, Kebon Kelapa
-8. **Cipondoh**: Griya Permata, Semanan A, Semanan B, Pondok Bahar
+1. **Kapuk Melati**: Melati A, Melati B, BGN (3 kelompok)
+2. **Jelambar**: Indah, Damar, Jaya, Pejagalan (4 kelompok)
+3. **Cengkareng**: Fajar A, Fajar B, Fajar C (3 kelompok)
+4. **Kebon Jahe**: Kebon Jahe A, Kebon Jahe B, Garikas, Taniwan (4 kelompok)
+5. **Bandara**: Prima, Rawa Lele, Kampung Duri (3 kelompok)
+6. **Taman Kota**: Rawa Buaya A, Rawa Buaya B, Taman Kota A, Taman Kota B (4 kelompok)
+7. **Kalideres**: Tegal Alur A, Tegal Alur B, Prepedan A, Prepedan B, Kebon Kelapa (5 kelompok)
+8. **Cipondoh**: Griya Permata, Semanan A, Semanan B, Pondok Bahar (4 kelompok)
 
-**Target per kelompok**: 25 orang laki-laki wajib hadir
+**Total**: 8 desa, 30 kelompok
+**Target per kelompok**: 25 putra + 25 putri = 50 orang per kelompok
 
 ## 🚀 Quick Start
 
@@ -96,7 +101,9 @@ NEXTAUTH_URL=http://localhost:3000
 4. **Setup database**
 - Buat project baru di Supabase
 - Jalankan SQL schema dari file `supabase-schema.sql`
-- Pastikan RLS (Row Level Security) sudah aktif
+- Jalankan SQL untuk test users: `create-super-admin.sql`
+- Perbaiki desa_id koordinator: `fix-koordinator-desa-id.sql`
+- Pastikan semua koordinator desa punya desa_id yang benar
 
 5. **Run development server**
 ```bash
@@ -134,10 +141,16 @@ attendance-system/
 ## 🔐 Authentication & Authorization
 
 ### User Roles
-- **super_admin**: Full access ke semua fitur
-- **koordinator_desa**: Input absensi untuk desa tertentu
+- **super_admin**: Full access ke semua fitur, input absensi semua desa
+- **koordinator_desa**: Input absensi untuk desa tertentu saja (filtered by desa_id)
 - **koordinator_daerah**: View laporan semua desa
 - **viewer**: Read-only access ke laporan
+
+### Session Management
+- **Primary**: HTTP Cookie dengan user session data
+- **Fallback**: localStorage untuk client-side access
+- **Auto-redirect**: Ke login jika session tidak valid
+- **Role-based filtering**: API otomatis filter data berdasarkan role dan desa_id
 
 ### Route Protection
 Middleware otomatis melindungi route berdasarkan role:
@@ -145,20 +158,27 @@ Middleware otomatis melindungi route berdasarkan role:
 - `/dashboard/koordinator-desa/*` - Hanya Koordinator Desa
 - `/dashboard/koordinator-daerah/*` - Hanya Koordinator Daerah
 - `/dashboard/viewer/*` - Hanya Viewer
+- `/absensi` - Super Admin (semua desa) + Koordinator Desa (desa sendiri)
+- `/laporan` - Semua role dengan filter sesuai akses
 
 ## 📊 Database Schema
 
 ### Tables
-- **profiles**: User profiles dengan role dan desa assignment
-- **desa**: Master data desa
-- **kelompok**: Master data kelompok per desa
+- **users**: User accounts dengan username/password, role, desa_id
+- **desa**: Master data desa (8 desa)
+- **kelompok**: Master data kelompok per desa (30 kelompok total)
+  - `target_putra`, `target_putri` per kelompok
+  - Foreign key ke `desa_id`
 - **absensi**: Data kehadiran bulanan
+  - `hadir_putra`, `hadir_putri` per kelompok per bulan
+  - `kelompok_id`, `bulan`, `tahun`, `input_by`
+  - Unique constraint: (kelompok_id, bulan, tahun)
 
 ### Key Features
-- Row Level Security (RLS) untuk data protection
-- Automatic triggers untuk timestamps
-- Indexes untuk performance optimization
-- Views untuk complex queries
+- **UPSERT Logic**: API otomatis handle insert baru atau update existing
+- **Role-based Filtering**: Query otomatis filter berdasarkan user role dan desa_id
+- **Data Aggregation**: Real-time calculation untuk laporan
+- **Referential Integrity**: Foreign keys dengan proper constraints
 
 ## 🎨 UI/UX Features
 
@@ -218,36 +238,56 @@ NEXTAUTH_URL=https://your-domain.vercel.app
 ## 🧪 Testing
 
 ### Manual Testing Checklist
-- [ ] Login/logout functionality
-- [ ] Role-based access control
-- [ ] Absensi input dan validation
-- [ ] Laporan generation
-- [ ] Export functionality
-- [ ] Print layouts
-- [ ] Mobile responsiveness
+- [x] Login/logout functionality (cookie + localStorage)
+- [x] Role-based access control (Super Admin vs Koordinator Desa)
+- [x] Super Admin: Desa selector → Input kelompok
+- [x] Koordinator Desa: Langsung form kelompok desanya (filtered by desa_id)
+- [x] UPSERT functionality (insert baru + update existing)
+- [x] Laporan dengan drill-down (klik desa → detail kelompok)
+- [x] Real-time aggregation dan filtering
+- [x] Visual indicators (data tersimpan, data diubah)
+- [ ] Export functionality (PDF/Excel - planned)
+- [x] Print layouts
+- [x] Mobile responsiveness
 
 ### Test Users
 Buat test users untuk setiap role:
 ```sql
 -- Super Admin
-INSERT INTO profiles (id, email, role) VALUES 
-('uuid-1', 'admin@asad.com', 'super_admin');
+INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
+('admin', 'admin123', 'Super Administrator', 'super_admin', NULL, true);
 
--- Koordinator Desa
-INSERT INTO profiles (id, email, role, desa_id) VALUES 
-('uuid-2', 'koordinator@kapukmelati.com', 'koordinator_desa', 1);
+-- Koordinator Desa (harus punya desa_id yang valid)
+INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
+('koordinator_kalideres', 'kalideres123', 'Koordinator Kalideres', 'koordinator_desa', 
+ (SELECT id FROM desa WHERE nama_desa = 'Kalideres'), true);
+
+-- Perbaiki desa_id untuk koordinator yang sudah ada
+UPDATE users 
+SET desa_id = (SELECT id FROM desa WHERE nama_desa = 'Bandara')
+WHERE username = 'koordinator_bandara';
 ```
 
 ## 📚 API Documentation
 
 ### Key Endpoints
-- `GET /api/absensi` - Get attendance data
-- `POST /api/absensi` - Create attendance record
-- `GET /api/laporan` - Generate reports
-- `GET /api/dashboard/stats` - Dashboard statistics
+- `GET /api/kelompok` - Get kelompok data (filtered by role)
+  - Super Admin: semua kelompok atau filter by `?desa=NamaDesa`
+  - Koordinator Desa: hanya kelompok desanya (by desa_id)
+- `GET /api/absensi` - Get attendance data (filtered by role)
+- `POST /api/absensi` - Create new attendance record
+- `PUT /api/absensi` - Update existing attendance (with UPSERT fallback)
+- `GET /api/laporan` - Generate aggregated reports per desa
+- `GET /api/laporan/detail` - Get detailed kelompok data per desa
+- `POST /api/auth/login` - Login with username/password
+
+### UPSERT Logic
+API `/api/absensi` PUT method menggunakan UPSERT:
+1. Coba UPDATE existing record
+2. Jika tidak ada (error PGRST116) → INSERT new record
+3. Return success message
 
 ### Error Handling
-Semua API endpoints menggunakan consistent error format:
 ```json
 {
   "error": "Error message",
@@ -277,13 +317,21 @@ Untuk support dan pertanyaan:
 
 ## 🔄 Changelog
 
-### v1.0.0 (2024-01-01)
-- Initial release
-- Basic authentication system
-- Role-based dashboards
-- Attendance input system
-- Report generation
-- Export functionality
+### v1.0.0 (2025-01-09)
+- ✅ **Authentication System**: Custom session dengan cookie + localStorage fallback
+- ✅ **Role-based Access**: Super Admin (semua desa) vs Koordinator Desa (desa sendiri)
+- ✅ **Input Absensi**: 
+  - Super Admin: Desa selector → Form kelompok
+  - Koordinator Desa: Langsung form kelompok desanya
+  - UPSERT functionality (auto insert/update)
+  - Visual indicators (data tersimpan, data diubah)
+- ✅ **Laporan dengan Drill-down**: 
+  - Tabel per desa dengan klik untuk detail kelompok
+  - Modal pop-up dengan data putra/putri terpisah
+  - Real-time aggregation dan filtering
+- ✅ **Database Schema**: 8 desa, 30 kelompok, target putra/putri terpisah
+- ✅ **API Endpoints**: Role-based filtering, UPSERT logic, error handling
+- ✅ **UI/UX**: Responsive design, loading states, status indicators
 
 ---
 
