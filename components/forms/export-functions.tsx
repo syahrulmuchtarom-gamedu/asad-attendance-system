@@ -13,10 +13,11 @@ export const exportToPDF = (data: AbsensiSummary[], bulan: number, tahun: number
     
     // Title
     doc.setFontSize(16)
-    doc.text('LAPORAN KEHADIRAN PENDERESAN ASAD DAERAH JAKARTA BARAT CENGKARENG', 105, 20, { align: 'center' })
+    doc.text('LAPORAN KEHADIRAN PENDERESAN ASAD', 105, 20, { align: 'center' })
+    doc.text('DAERAH JAKARTA BARAT CENGKARENG', 105, 30, { align: 'center' })
     doc.setFontSize(12)
-    doc.text(`Periode: ${getMonthName(bulan)} ${tahun}`, 105, 30, { align: 'center' })
-    doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 105, 40, { align: 'center' })
+    doc.text(`Periode: ${getMonthName(bulan)} ${tahun}`, 105, 40, { align: 'center' })
+    doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 105, 50, { align: 'center' })
 
     // Table data
     const tableData = data.map(item => [
@@ -50,7 +51,7 @@ export const exportToPDF = (data: AbsensiSummary[], bulan: number, tahun: number
     ;(doc as any).autoTable({
       head: [['Desa', 'Kelompok', 'Target Putra', 'Hadir Putra', '% Putra', 'Target Putri', 'Hadir Putri', '% Putri']],
       body: tableData,
-      startY: 50,
+      startY: 60,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [66, 139, 202] },
       alternateRowStyles: { fillColor: [245, 245, 245] }
@@ -99,7 +100,8 @@ export const exportToExcel = (data: AbsensiSummary[], bulan: number, tahun: numb
 
     // Add title rows
     XLSX.utils.sheet_add_aoa(ws, [
-      ['LAPORAN KEHADIRAN PENDERESAN ASAD DAERAH JAKARTA BARAT CENGKARENG'],
+      ['LAPORAN KEHADIRAN PENDERESAN ASAD'],
+      ['DAERAH JAKARTA BARAT CENGKARENG'],
       [`Periode: ${getMonthName(bulan)} ${tahun}`],
       [`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`],
       []
