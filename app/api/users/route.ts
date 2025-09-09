@@ -104,6 +104,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Cek apakah user pernah input absensi
+    const { data: absensiData } = await supabase
+      .from('absensi')
+      .select('id')
+      .eq('input_by', id)
+      .limit(1)
+
+    if (absensiData && absensiData.length > 0) {
+      // Jika user pernah input absensi, set input_by ke NULL atau user lain
+      await supabase
+        .from('absensi')
+        .update({ input_by: null })
+        .eq('input_by', id)
+    }
+
+    // Sekarang hapus user
     const { error } = await supabase
       .from('users')
       .delete()
