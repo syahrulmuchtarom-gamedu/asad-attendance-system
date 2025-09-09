@@ -64,12 +64,17 @@ export default function AbsensiPage() {
       const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
       if (sessionCookie) {
         const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+        console.log('User role detected:', sessionData.role)
         setUserRole(sessionData.role)
         if (sessionData.role === 'super_admin') {
+          console.log('Setting showDesaList to true for super_admin')
           setShowDesaList(true)
         } else {
+          console.log('Setting showDesaList to false for role:', sessionData.role)
           setShowDesaList(false)
         }
+      } else {
+        console.log('No session cookie found')
       }
     } catch (error) {
       console.error('Error getting user role:', error)
@@ -78,10 +83,14 @@ export default function AbsensiPage() {
 
   const fetchDesaList = async () => {
     try {
+      console.log('Fetching desa list...')
       const response = await fetch('/api/desa')
       if (response.ok) {
         const data = await response.json()
+        console.log('Desa list fetched:', data.length, 'items')
         setDesaList(data)
+      } else {
+        console.error('Failed to fetch desa list:', response.status)
       }
     } catch (error) {
       console.error('Error fetching desa list:', error)
@@ -261,6 +270,8 @@ export default function AbsensiPage() {
     )
   }
 
+  console.log('Render check:', { userRole, showDesaList, kelompokListLength: kelompokList.length })
+  
   // Show desa list for super admin
   if (userRole === 'super_admin' && showDesaList) {
     return (
