@@ -1,29 +1,85 @@
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Target, TrendingUp, Plus, FileText } from 'lucide-react'
 
-export default async function KoordinatorDesaDashboard() {
-  try {
-    const cookieStore = cookies()
-    const sessionCookie = cookieStore.get('user_session')?.value
-    
-    if (!sessionCookie) {
-      redirect('/login')
-    }
+interface DashboardStats {
+  totalKelompok: number
+  sudahInput: number
+  belumInput: number
+  persentaseKehadiran: number
+  totalHadir: number
+  totalTarget: number
+  namaUser: string
+  namaDesa: string
+}
 
-    let user
+export default function KoordinatorDesaDashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalKelompok: 0,
+    sudahInput: 0,
+    belumInput: 0,
+    persentaseKehadiran: 0,
+    totalHadir: 0,
+    totalTarget: 0,
+    namaUser: '',
+    namaDesa: ''
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
     try {
-      user = JSON.parse(sessionCookie)
-    } catch (e) {
-      redirect('/login')
+      // Fetch kelompok data
+      const kelompokResponse = await fetch('/api/kelompok')
+      const kelompokData = await kelompokResponse.json()
+      
+      // Fetch absensi data untuk bulan ini
+      const currentMonth = new Date().getMonth() + 1
+      const currentYear = new Date().getFullYear()
+      const absensiResponse = await fetch(`/api/absensi?bulan=${currentMonth}&tahun=${currentYear}`)
+      const absensiResult = await absensiResponse.json()
+      const absensiData = absensiResult.data || []
+      
+      // Calculate stats
+      const totalKelompok = kelompokData.length
+      const sudahInput = absensiData.length
+      const belumInput = totalKelompok - sudahInput
+      
+      const totalTarget = kelompokData.reduce((sum: number, k: any) => 
+        sum + (k.target_putra || 0) + (k.target_putri || 0), 0)
+      const totalHadir = absensiData.reduce((sum: number, a: any) => 
+        sum + (a.hadir_putra || 0) + (a.hadir_putri || 0), 0)
+      const persentaseKehadiran = totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0
+      
+      const namaDesa = kelompokData[0]?.desa_name || 'Unknown'
+      
+      setStats({
+        totalKelompok,
+        sudahInput,
+        belumInput,
+        persentaseKehadiran,
+        totalHadir,
+        totalTarget,
+        namaUser: 'Koordinator',
+        namaDesa
+      })
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
     }
-    
-    if (!user || user.role !== 'koordinator_desa') {
-      redirect('/dashboard')
-    }
+  }
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>
+  }
 
   return (
     <div className="space-y-6">
@@ -31,7 +87,7 @@ export default async function KoordinatorDesaDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Koordinator Desa</h1>
           <p className="text-muted-foreground">
-            Selamat datang, {user.full_name}
+            Selamat datang, {stats.namaUser} - Desa {stats.namaDesa}
           </p>
         </div>
         <div className="flex gap-2">
@@ -57,9 +113,9 @@ export default async function KoordinatorDesaDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{stats.totalKelompok}</div>
             <p className="text-xs text-muted-foreground">
-              Kelompok di desa
+              Kelompok di desa {stats.namaDesa}
             </p>
           </CardContent>
         </Card>
@@ -70,9 +126,9 @@ export default async function KoordinatorDesaDashboard() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{stats.sudahInput}</div>
             <p className="text-xs text-muted-foreground">
-              Dari 8 kelompok
+              Dari {stats.totalKelompok} kelompok
             </p>
           </CardContent>
         </Card>
@@ -83,7 +139,7 @@ export default async function KoordinatorDesaDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">3</div>
+            <div className="text-2xl font-bold text-red-600">{stats.belumInput}</div>
             <p className="text-xs text-muted-foreground">
               Kelompok tersisa
             </p>
@@ -96,17 +152,13 @@ export default async function KoordinatorDesaDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">78%</div>
+            <div className="text-2xl font-bold">{stats.persentaseKehadiran.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">
-              156 dari 200 target
+              {stats.totalHadir} dari {stats.totalTarget} target
             </p>
           </CardContent>
         </Card>
       </div>
     </div>
   )
-  } catch (error) {
-    console.error('Dashboard error:', error)
-    redirect('/login')
-  }
 }

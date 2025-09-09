@@ -1,24 +1,76 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BarChart3, Download, FileText, Calendar, Users } from 'lucide-react'
 
-const mockLaporanDesa = [
-  { kelompok: 'Melati A', target_putra: 25, hadir_putra: 23, target_putri: 0, hadir_putri: 0, persentase: 92.0 },
-  { kelompok: 'Melati B', target_putra: 25, hadir_putra: 22, target_putri: 0, hadir_putri: 0, persentase: 88.0 },
-  { kelompok: 'BGN', target_putra: 25, hadir_putra: 23, target_putri: 0, hadir_putri: 0, persentase: 92.0 },
-]
+interface LaporanItem {
+  kelompok: string
+  target_putra: number
+  hadir_putra: number
+  target_putri: number
+  hadir_putri: number
+  persentase: number
+}
 
 export default function LaporanDesaPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
   const [selectedYear, setSelectedYear] = useState('2025')
+  const [laporanData, setLaporanData] = useState<LaporanItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [namaDesa, setNamaDesa] = useState('Unknown')
 
-  const totalTargetPutra = mockLaporanDesa.reduce((sum, item) => sum + item.target_putra, 0)
-  const totalHadirPutra = mockLaporanDesa.reduce((sum, item) => sum + item.hadir_putra, 0)
-  const overallPercentage = (totalHadirPutra / totalTargetPutra) * 100
+  useEffect(() => {
+    fetchLaporanData()
+  }, [selectedMonth, selectedYear])
+
+  const fetchLaporanData = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch kelompok data
+      const kelompokResponse = await fetch('/api/kelompok')
+      const kelompokData = await kelompokResponse.json()
+      
+      // Fetch absensi data
+      const absensiResponse = await fetch(`/api/absensi?bulan=${selectedMonth}&tahun=${selectedYear}`)
+      const absensiResult = await absensiResponse.json()
+      const absensiData = absensiResult.data || []
+      
+      // Combine data
+      const combinedData = kelompokData.map((kelompok: any) => {
+        const absensi = absensiData.find((a: any) => a.kelompok_id === kelompok.id)
+        const totalTarget = kelompok.target_putra + kelompok.target_putri
+        const totalHadir = (absensi?.hadir_putra || 0) + (absensi?.hadir_putri || 0)
+        const persentase = totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0
+        
+        return {
+          kelompok: kelompok.nama_kelompok,
+          target_putra: kelompok.target_putra,
+          hadir_putra: absensi?.hadir_putra || 0,
+          target_putri: kelompok.target_putri,
+          hadir_putri: absensi?.hadir_putri || 0,
+          persentase
+        }
+      })
+      
+      setLaporanData(combinedData)
+      if (kelompokData.length > 0) {
+        setNamaDesa(kelompokData[0].desa_name || 'Unknown')
+      }
+    } catch (error) {
+      console.error('Error fetching laporan data:', error)
+      setLaporanData([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const totalTargetPutra = laporanData.reduce((sum, item) => sum + item.target_putra, 0)
+  const totalHadirPutra = laporanData.reduce((sum, item) => sum + item.hadir_putra, 0)
+  const overallPercentage = totalTargetPutra > 0 ? (totalHadirPutra / totalTargetPutra) * 100 : 0
 
   const handleExportPDF = () => {
     alert('Export PDF akan segera tersedia')
@@ -38,7 +90,7 @@ export default function LaporanDesaPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Laporan Desa</h1>
           <p className="text-muted-foreground">
-            Laporan kehadiran kelompok di desa Kapuk Melati
+            Laporan kehadiran kelompok di desa {namaDesa}
           </p>
         </div>
         <div className="flex gap-2">
@@ -118,7 +170,7 @@ export default function LaporanDesaPage() {
             <CardTitle className="text-sm font-medium">Total Kelompok</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockLaporanDesa.length}</div>
+            <div className="text-2xl font-bold">{laporanData.length}</div>
             <p className="text-xs text-muted-foreground">Kelompok</p>
           </CardContent>
         </Card>
@@ -174,7 +226,17 @@ export default function LaporanDesaPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockLaporanDesa.map((item, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center">Loading...</td>
+                  </tr>
+                ) : laporanData.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                      Belum ada data untuk periode ini
+                    </td>
+                  </tr>
+                ) : laporanData.map((item, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="p-3 font-medium">{item.kelompok}</td>
                     <td className="p-3 text-center">{item.target_putra}</td>
@@ -195,26 +257,28 @@ export default function LaporanDesaPage() {
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
-                <tr className="border-t-2 bg-gray-50">
-                  <td className="p-3 font-bold">TOTAL</td>
-                  <td className="p-3 text-center font-bold">{totalTargetPutra}</td>
-                  <td className="p-3 text-center font-bold">{totalHadirPutra}</td>
-                  <td className="p-3 text-center font-bold">0</td>
-                  <td className="p-3 text-center font-bold">0</td>
-                  <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
-                  <td className="p-3 text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      overallPercentage >= 90 ? 'bg-green-100 text-green-800' :
-                      overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {overallPercentage >= 90 ? 'Sangat Baik' :
-                       overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
-                    </span>
-                  </td>
-                </tr>
-              </tfoot>
+              {laporanData.length > 0 && (
+                <tfoot>
+                  <tr className="border-t-2 bg-gray-50">
+                    <td className="p-3 font-bold">TOTAL</td>
+                    <td className="p-3 text-center font-bold">{totalTargetPutra}</td>
+                    <td className="p-3 text-center font-bold">{totalHadirPutra}</td>
+                    <td className="p-3 text-center font-bold">{laporanData.reduce((sum, item) => sum + item.target_putri, 0)}</td>
+                    <td className="p-3 text-center font-bold">{laporanData.reduce((sum, item) => sum + item.hadir_putri, 0)}</td>
+                    <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
+                    <td className="p-3 text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        overallPercentage >= 90 ? 'bg-green-100 text-green-800' :
+                        overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {overallPercentage >= 90 ? 'Sangat Baik' :
+                         overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                      </span>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </CardContent>
