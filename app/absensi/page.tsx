@@ -153,6 +153,14 @@ export default function AbsensiPage() {
       
       // Refresh data setelah submit
       await fetchExistingData()
+      
+      // Jika mode insert berhasil, pindah ke bulan saat ini
+      if (!isEditMode) {
+        const currentMonth = new Date().getMonth() + 1
+        const currentYear = new Date().getFullYear()
+        setSelectedMonth(currentMonth)
+        setSelectedYear(currentYear)
+      }
     } catch (error: any) {
       alert(`Error: ${error.message}`)
     } finally {
