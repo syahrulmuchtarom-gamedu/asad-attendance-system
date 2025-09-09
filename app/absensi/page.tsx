@@ -23,12 +23,20 @@ export default function AbsensiPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Mock data kelompok - dalam implementasi real, fetch dari API berdasarkan desa user
-    setKelompokList([
-      { id: 1, nama_kelompok: 'Melati A', target_putra: 25, target_putri: 0 },
-      { id: 2, nama_kelompok: 'Melati B', target_putra: 25, target_putri: 0 },
-      { id: 3, nama_kelompok: 'BGN', target_putra: 25, target_putri: 0 },
-    ])
+    // Fetch kelompok berdasarkan desa user
+    const fetchKelompok = async () => {
+      try {
+        const response = await fetch('/api/kelompok')
+        if (response.ok) {
+          const data = await response.json()
+          setKelompokList(data)
+        }
+      } catch (error) {
+        console.error('Error fetching kelompok:', error)
+      }
+    }
+    
+    fetchKelompok()
   }, [])
 
   const handleInputChange = (kelompokId: number, field: 'hadir_putra' | 'hadir_putri', value: string) => {
@@ -57,9 +65,7 @@ export default function AbsensiPage() {
               bulan: selectedMonth,
               tahun: selectedYear,
               hadir_putra: data.hadir_putra || 0,
-              hadir_putri: data.hadir_putri || 0,
-              target_putra: kelompok.target_putra,
-              target_putri: kelompok.target_putri
+              hadir_putri: data.hadir_putri || 0
             })
           })
 

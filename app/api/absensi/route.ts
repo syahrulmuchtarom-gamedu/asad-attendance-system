@@ -4,13 +4,41 @@ import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   try {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
     const { searchParams } = new URL(request.url)
     const bulan = searchParams.get('bulan')
     const tahun = searchParams.get('tahun')
 
     const supabase = createAdminClient()
     
-    let query = supabase.from('absensi').select('*')
+    let query = supabase
+      .from('absensi')
+      .select(`
+        *,
+        kelompok!inner(
+          id,
+          nama_kelompok,
+          desa_id,
+          target_putra,
+          target_putri,
+          desa!inner(
+            id,
+            nama_desa
+          )
+        )
+      `)
+    
+    // Filter berdasarkan role dan desa
+    if (user.role === 'koordinator_desa' && user.desa_id) {
+      query = query.eq('kelompok.desa_id', user.desa_id)
+    }
     
     if (bulan) query = query.eq('bulan', bulan)
     if (tahun) query = query.eq('tahun', tahun)
@@ -41,6 +69,21 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
     const supabase = createAdminClient()
 
+    // Validasi: koordinator desa hanya bisa input untuk kelompok di desanya
+    if (user.role === 'koordinator_desa') {
+      const { data: kelompok } = await supabase
+        .from('kelompok')
+        .select('desa_id')
+        .eq('id', data.kelompok_id)
+        .single()
+      
+      if (!kelompok || kelompok.desa_id !== user.desa_id) {
+        return NextResponse.json({ 
+          error: 'Anda tidak memiliki akses untuk kelompok ini' 
+        }, { status: 403 })
+      }
+    }
+
     // Check if data already exists
     const { data: existing } = await supabase
       .from('absensi')
@@ -56,7 +99,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Insert new data (tanpa target_putra/target_putri)
+    // Insert new data
     const { data: newAbsensi, error } = await supabase
       .from('absensi')
       .insert({

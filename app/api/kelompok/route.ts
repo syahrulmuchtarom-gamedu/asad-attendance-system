@@ -12,13 +12,28 @@ const supabase = createClient(
   }
 )
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Simple query without RLS
-    const { data: kelompok, error } = await supabase
+    const cookieStore = request.cookies
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
+    
+    let query = supabase
       .from('kelompok')
       .select('*')
       .order('nama_kelompok')
+    
+    // Filter berdasarkan role dan desa
+    if (user.role === 'koordinator_desa' && user.desa_id) {
+      query = query.eq('desa_id', user.desa_id)
+    }
+    
+    const { data: kelompok, error } = await query
 
     if (error) {
       console.error('Kelompok fetch error:', error)
@@ -47,6 +62,20 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = request.cookies
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
+    
+    // Hanya super_admin yang bisa menambah kelompok
+    if (user.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
 
     if (!nama_kelompok || !desa_id || !target_putra || !target_putri) {
