@@ -83,14 +83,12 @@ export default function AbsensiPage() {
         } else {
           console.log('❌ No session cookie found')
           console.log('🔍 Available cookies:', cookies)
-          // Fallback: redirect to login if no session
-          window.location.href = '/login'
+          // Don't redirect here, let layout handle it
         }
       }
     } catch (error) {
       console.error('❌ Error getting user role:', error)
-      // Fallback: redirect to login on error
-      window.location.href = '/login'
+      // Don't redirect here, let layout handle it
     }
   }
 
