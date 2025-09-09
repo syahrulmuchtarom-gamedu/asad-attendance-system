@@ -6,9 +6,9 @@ import { ClientToaster } from '@/components/client-toaster'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Sistem Absensi ASAD',
-  description: 'Sistem Absensi Kelompok ASAD Cengkareng',
-  keywords: 'absensi, ASAD, cengkareng, sistem, kelompok',
+  title: 'Website Absensi Penderesan ASAD Padepokan Jakarta Barat Cengkareng',
+  description: 'Website Absensi Penderesan ASAD Padepokan Jakarta Barat Cengkareng',
+  keywords: 'absensi, ASAD, cengkareng, jakarta barat, padepokan, penderesan, website, kelompok',
   authors: [{ name: 'ASAD Development Team' }],
 }
 
