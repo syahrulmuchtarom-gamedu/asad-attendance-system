@@ -58,7 +58,7 @@ export default function LaporanPage() {
       const exportData = laporanData.map((item, index) => ({
         desa_id: index + 1,
         nama_desa: item.desa,
-        total_kelompok: 1,
+        total_kelompok: item.kelompok_count || 1,
         total_target_putra: Math.floor(item.target / 2),
         total_hadir_putra: Math.floor(item.hadir / 2),
         persentase_putra: item.target > 0 ? (Math.floor(item.hadir / 2) / Math.floor(item.target / 2)) * 100 : 0,
@@ -84,7 +84,7 @@ export default function LaporanPage() {
       const exportData = laporanData.map((item, index) => ({
         desa_id: index + 1,
         nama_desa: item.desa,
-        total_kelompok: 1,
+        total_kelompok: item.kelompok_count || 1,
         total_target_putra: Math.floor(item.target / 2),
         total_hadir_putra: Math.floor(item.hadir / 2),
         persentase_putra: item.target > 0 ? (Math.floor(item.hadir / 2) / Math.floor(item.target / 2)) * 100 : 0,

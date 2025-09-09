@@ -63,13 +63,15 @@ export async function GET(request: NextRequest) {
           desaMap.set(desaName, {
             desa: desaName,
             target: 0,
-            hadir: 0
+            hadir: 0,
+            kelompok_count: 0
           })
         }
         
         const desaData = desaMap.get(desaName)
         desaData.target += targetPutra + targetPutri
         desaData.hadir += hadirPutra + hadirPutri
+        desaData.kelompok_count += 1
       })
     }
     

@@ -13,7 +13,7 @@ export const exportToPDF = (data: AbsensiSummary[], bulan: number, tahun: number
     
     // Title
     doc.setFontSize(16)
-    doc.text('LAPORAN ABSENSI KELOMPOK ASAD', 105, 20, { align: 'center' })
+    doc.text('LAPORAN KEHADIRAN PENDERESAN ASAD DAERAH JAKARTA BARAT CENGKARENG', 105, 20, { align: 'center' })
     doc.setFontSize(12)
     doc.text(`Periode: ${getMonthName(bulan)} ${tahun}`, 105, 30, { align: 'center' })
     doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 105, 40, { align: 'center' })
@@ -99,7 +99,7 @@ export const exportToExcel = (data: AbsensiSummary[], bulan: number, tahun: numb
 
     // Add title rows
     XLSX.utils.sheet_add_aoa(ws, [
-      ['LAPORAN ABSENSI KELOMPOK ASAD'],
+      ['LAPORAN KEHADIRAN PENDERESAN ASAD DAERAH JAKARTA BARAT CENGKARENG'],
       [`Periode: ${getMonthName(bulan)} ${tahun}`],
       [`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`],
       []
