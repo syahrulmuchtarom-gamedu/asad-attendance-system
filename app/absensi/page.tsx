@@ -62,12 +62,17 @@ export default function AbsensiPage() {
   const fetchUserRole = () => {
     try {
       if (typeof window !== 'undefined') {
+        console.log('🍪 All cookies:', document.cookie)
         const cookies = document.cookie.split(';')
         const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
+        
         if (sessionCookie) {
-          const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+          const cookieValue = sessionCookie.split('=')[1]
+          console.log('🔑 Raw cookie value:', cookieValue)
+          const sessionData = JSON.parse(decodeURIComponent(cookieValue))
           console.log('🔍 User role detected:', sessionData.role)
           setUserRole(sessionData.role)
+          
           if (sessionData.role === 'super_admin') {
             console.log('✅ Setting showDesaList = true for super_admin')
             setShowDesaList(true)
@@ -77,10 +82,15 @@ export default function AbsensiPage() {
           }
         } else {
           console.log('❌ No session cookie found')
+          console.log('🔍 Available cookies:', cookies)
+          // Fallback: redirect to login if no session
+          window.location.href = '/login'
         }
       }
     } catch (error) {
       console.error('❌ Error getting user role:', error)
+      // Fallback: redirect to login on error
+      window.location.href = '/login'
     }
   }
 
