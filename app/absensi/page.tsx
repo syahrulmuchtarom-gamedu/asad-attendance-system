@@ -35,6 +35,7 @@ export default function AbsensiPage() {
   const [dataStatus, setDataStatus] = useState<'loading' | 'new' | 'existing'>('loading')
   const [selectedDesa, setSelectedDesa] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(true)
   const [showDesaList, setShowDesaList] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
@@ -72,6 +73,7 @@ export default function AbsensiPage() {
           const sessionData = JSON.parse(decodeURIComponent(cookieValue))
           console.log('🔍 User role detected:', sessionData.role)
           setUserRole(sessionData.role)
+          setIsLoading(false)
           
           if (sessionData.role === 'super_admin') {
             console.log('✅ Setting showDesaList = true for super_admin')
@@ -83,11 +85,13 @@ export default function AbsensiPage() {
         } else {
           console.log('❌ No session cookie found')
           console.log('🔍 Available cookies:', cookies)
+          setIsLoading(false)
           // Don't redirect here, let layout handle it
         }
       }
     } catch (error) {
       console.error('❌ Error getting user role:', error)
+      setIsLoading(false)
       // Don't redirect here, let layout handle it
     }
   }
@@ -277,11 +281,23 @@ export default function AbsensiPage() {
     )
   }
 
-  console.log('🎯 Render state:', { userRole, showDesaList, isClient, kelompokCount: kelompokList.length })
+  console.log('🎯 Render state:', { userRole, showDesaList, isClient, isLoading, kelompokCount: kelompokList.length })
   
-  // Show desa list for super admin when showDesaList is true
-  if (userRole === 'super_admin' && showDesaList && isClient) {
-    console.log('📋 Rendering desa list for super admin')
+  // Show loading while fetching user role
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // FORCE SHOW DESA LIST FOR SUPER ADMIN - WITH LOADING CHECK
+  if (userRole === 'super_admin' && isClient) {
+    console.log('📋 FORCE Rendering desa list for super admin')
     return (
       <div className="space-y-6">
         <div>
