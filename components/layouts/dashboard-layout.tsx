@@ -67,6 +67,7 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
           ...baseItems,
           { name: 'Kelola User', href: '/dashboard/super-admin/users', icon: Users },
           { name: 'Master Data', href: '/dashboard/super-admin/master', icon: Settings },
+          { name: 'Input Absensi', href: '/absensi', icon: UserCheck },
           { name: 'Laporan', href: '/laporan', icon: BarChart3 },
         ]
       case 'koordinator_desa':
