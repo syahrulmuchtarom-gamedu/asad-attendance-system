@@ -35,7 +35,7 @@ export default function AbsensiPage() {
   const [dataStatus, setDataStatus] = useState<'loading' | 'new' | 'existing'>('loading')
   const [selectedDesa, setSelectedDesa] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('')
-  const [showDesaList, setShowDesaList] = useState(true)
+  const [showDesaList, setShowDesaList] = useState(false)
 
   useEffect(() => {
     fetchUserRole()
@@ -52,10 +52,10 @@ export default function AbsensiPage() {
   }, [userRole])
 
   useEffect(() => {
-    if (kelompokList.length > 0 && (!showDesaList || selectedDesa)) {
+    if (kelompokList.length > 0 && !showDesaList) {
       fetchExistingData()
     }
-  }, [selectedMonth, selectedYear, kelompokList, showDesaList, selectedDesa])
+  }, [selectedMonth, selectedYear, kelompokList, showDesaList])
 
   const fetchUserRole = async () => {
     try {
@@ -65,7 +65,9 @@ export default function AbsensiPage() {
       if (sessionCookie) {
         const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
         setUserRole(sessionData.role)
-        if (sessionData.role !== 'super_admin') {
+        if (sessionData.role === 'super_admin') {
+          setShowDesaList(true)
+        } else {
           setShowDesaList(false)
         }
       }
@@ -334,7 +336,25 @@ export default function AbsensiPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
+              {desaList.length > 0 ? desaList.map((desa) => (
+                <Card 
+                  key={desa.nama_desa} 
+                  className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
+                  onClick={() => handleDesaClick(desa.nama_desa)}
+                >
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Klik untuk input absensi
+                      </p>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Input Absensi
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )) : [
                 'Kalideres', 'Kapuk Melati', 'Jelambar', 'Cengkareng',
                 'Kebon Jahe', 'Bandara', 'Taman Kota', 'Cipondoh'
               ].map((desaName) => (
