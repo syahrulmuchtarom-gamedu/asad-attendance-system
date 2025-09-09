@@ -234,7 +234,7 @@ export default function AbsensiPage() {
       await fetchExistingData()
       
       // Jika mode insert berhasil dan bukan super admin, pindah ke bulan saat ini
-      if (!isEditMode && userRole !== 'super_admin') {
+      if (!isEditMode && !isSuperAdmin) {
         const currentMonth = new Date().getMonth() + 1
         const currentYear = new Date().getFullYear()
         setSelectedMonth(currentMonth)
@@ -242,7 +242,7 @@ export default function AbsensiPage() {
       }
       
       // Jika super admin, kembali ke daftar desa setelah berhasil
-      if (userRole === 'super_admin') {
+      if (isSuperAdmin) {
         setTimeout(() => {
           handleBackToDesa()
         }, 1000)
@@ -264,14 +264,21 @@ export default function AbsensiPage() {
     )
   }
 
-  // Force show desa list for testing - remove this later
-  const shouldShowDesaList = isClient && (
-    (userRole === 'super_admin' && showDesaList) ||
-    (userRole === 'super_admin' && kelompokList.length === 0)
-  )
+  // Check if user is super admin from cookie directly
+  const isSuperAdmin = isClient && typeof window !== 'undefined' && (() => {
+    try {
+      const cookies = document.cookie.split(';')
+      const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
+      if (sessionCookie) {
+        const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+        return sessionData.role === 'super_admin'
+      }
+    } catch (e) {}
+    return false
+  })()
   
-  // Show desa list for super admin
-  if (shouldShowDesaList) {
+  // Show desa list ONLY for super admin
+  if (isSuperAdmin && isClient) {
     return (
       <div className="space-y-6">
         <div>
@@ -345,25 +352,7 @@ export default function AbsensiPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {desaList.length > 0 ? desaList.map((desa) => (
-                <Card 
-                  key={desa.nama_desa} 
-                  className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
-                  onClick={() => handleDesaClick(desa.nama_desa)}
-                >
-                  <CardContent className="p-4">
-                    <div className="text-center">
-                      <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Klik untuk input absensi
-                      </p>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Input Absensi
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )) : [
+              {[
                 'Kalideres', 'Kapuk Melati', 'Jelambar', 'Cengkareng',
                 'Kebon Jahe', 'Bandara', 'Taman Kota', 'Cipondoh'
               ].map((desaName) => (
@@ -392,6 +381,7 @@ export default function AbsensiPage() {
     )
   }
 
+  // Regular form for koordinator desa or super admin after selecting desa
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -403,15 +393,15 @@ export default function AbsensiPage() {
             Input data kehadiran bulanan per kelompok
           </p>
         </div>
-        {userRole === 'super_admin' && selectedDesa && (
+        {isSuperAdmin && selectedDesa && (
           <Button variant="outline" onClick={handleBackToDesa}>
             ← Kembali ke Daftar Desa
           </Button>
         )}
       </div>
 
-      {/* Filter Periode - hanya tampil jika bukan super admin atau sudah pilih desa */}
-      {(userRole !== 'super_admin' || selectedDesa) && (
+      {/* Filter Periode - tampil untuk koordinator desa atau super admin yang sudah pilih desa */}
+      {(!isSuperAdmin || selectedDesa) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -541,7 +531,7 @@ export default function AbsensiPage() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">
                       {kelompok.nama_kelompok}
-                      {kelompok.desa_name && userRole === 'super_admin' && (
+                      {kelompok.desa_name && isSuperAdmin && (
                         <span className="text-sm text-muted-foreground ml-2">({kelompok.desa_name})</span>
                       )}
                     </h3>
