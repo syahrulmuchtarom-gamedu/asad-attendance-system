@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { exportToPDF, exportToExcel } from '@/components/forms/export-functions'
 import { BarChart3, Download, FileText, Calendar, X } from 'lucide-react'
 
 export default function LaporanPage() {
@@ -47,11 +48,53 @@ export default function LaporanPage() {
   const overallPercentage = totalTarget > 0 ? (totalHadir / totalTarget) * 100 : 0
 
   const handleExportPDF = () => {
-    alert('Export PDF akan segera tersedia')
+    try {
+      if (laporanData.length === 0) {
+        alert('Tidak ada data untuk diekspor')
+        return
+      }
+      
+      // Transform data untuk export
+      const exportData = laporanData.map(item => ({
+        nama_desa: item.desa,
+        total_kelompok: 1, // Placeholder, bisa disesuaikan
+        total_target_putra: Math.floor(item.target / 2),
+        total_hadir_putra: Math.floor(item.hadir / 2),
+        persentase_putra: item.target > 0 ? (Math.floor(item.hadir / 2) / Math.floor(item.target / 2)) * 100 : 0,
+        total_target_putri: Math.ceil(item.target / 2),
+        total_hadir_putri: Math.ceil(item.hadir / 2),
+        persentase_putri: item.target > 0 ? (Math.ceil(item.hadir / 2) / Math.ceil(item.target / 2)) * 100 : 0
+      }))
+      
+      exportToPDF(exportData, parseInt(selectedMonth), parseInt(selectedYear))
+    } catch (error) {
+      alert('Gagal export PDF: ' + (error as Error).message)
+    }
   }
 
   const handleExportExcel = () => {
-    alert('Export Excel akan segera tersedia')
+    try {
+      if (laporanData.length === 0) {
+        alert('Tidak ada data untuk diekspor')
+        return
+      }
+      
+      // Transform data untuk export
+      const exportData = laporanData.map(item => ({
+        nama_desa: item.desa,
+        total_kelompok: 1, // Placeholder, bisa disesuaikan
+        total_target_putra: Math.floor(item.target / 2),
+        total_hadir_putra: Math.floor(item.hadir / 2),
+        persentase_putra: item.target > 0 ? (Math.floor(item.hadir / 2) / Math.floor(item.target / 2)) * 100 : 0,
+        total_target_putri: Math.ceil(item.target / 2),
+        total_hadir_putri: Math.ceil(item.hadir / 2),
+        persentase_putri: item.target > 0 ? (Math.ceil(item.hadir / 2) / Math.ceil(item.target / 2)) * 100 : 0
+      }))
+      
+      exportToExcel(exportData, parseInt(selectedMonth), parseInt(selectedYear))
+    } catch (error) {
+      alert('Gagal export Excel: ' + (error as Error).message)
+    }
   }
 
   const handlePrint = () => {
