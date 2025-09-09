@@ -310,8 +310,8 @@ export default function AbsensiPage() {
     )
   }
   
-  // FORCE SHOW DESA LIST FOR SUPER ADMIN - WITH LOADING CHECK
-  if (userRole === 'super_admin' && isClient) {
+  // SHOW DESA LIST FOR SUPER ADMIN ONLY WHEN showDesaList = true
+  if (userRole === 'super_admin' && showDesaList && isClient) {
     console.log('📋 FORCE Rendering desa list for super admin')
     return (
       <div className="space-y-6">
