@@ -13,31 +13,86 @@ interface Kelompok {
   nama_kelompok: string
   target_putra: number
   target_putri: number
+  desa_name?: string
+}
+
+interface Desa {
+  id: number
+  nama_desa: string
+  kelompok_count: number
+  total_target: number
 }
 
 export default function AbsensiPage() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(2025)
   const [kelompokList, setKelompokList] = useState<Kelompok[]>([])
+  const [desaList, setDesaList] = useState<Desa[]>([])
   const [absensiData, setAbsensiData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
   const [existingData, setExistingData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
   const [loading, setLoading] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [dataStatus, setDataStatus] = useState<'loading' | 'new' | 'existing'>('loading')
+  const [selectedDesa, setSelectedDesa] = useState<string>('')
+  const [userRole, setUserRole] = useState<string>('')
+  const [showDesaList, setShowDesaList] = useState(true)
 
   useEffect(() => {
-    fetchKelompok()
+    fetchUserRole()
   }, [])
+  
+  useEffect(() => {
+    if (userRole) {
+      if (userRole === 'super_admin') {
+        fetchDesaList()
+      } else {
+        fetchKelompok()
+      }
+    }
+  }, [userRole])
 
   useEffect(() => {
-    if (kelompokList.length > 0) {
+    if (kelompokList.length > 0 && (!showDesaList || selectedDesa)) {
       fetchExistingData()
     }
-  }, [selectedMonth, selectedYear, kelompokList])
+  }, [selectedMonth, selectedYear, kelompokList, showDesaList, selectedDesa])
 
-  const fetchKelompok = async () => {
+  const fetchUserRole = async () => {
     try {
-      const response = await fetch('/api/kelompok')
+      // Get user role from session cookie
+      const cookies = document.cookie.split(';')
+      const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
+      if (sessionCookie) {
+        const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+        setUserRole(sessionData.role)
+        if (sessionData.role !== 'super_admin') {
+          setShowDesaList(false)
+        }
+      }
+    } catch (error) {
+      console.error('Error getting user role:', error)
+    }
+  }
+
+  const fetchDesaList = async () => {
+    try {
+      const response = await fetch('/api/desa')
+      if (response.ok) {
+        const data = await response.json()
+        setDesaList(data)
+      }
+    } catch (error) {
+      console.error('Error fetching desa list:', error)
+    }
+  }
+
+  const fetchKelompok = async (desaName?: string) => {
+    try {
+      let url = '/api/kelompok'
+      if (desaName) {
+        url += `?desa=${encodeURIComponent(desaName)}`
+      }
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setKelompokList(data)
@@ -97,6 +152,25 @@ export default function AbsensiPage() {
     }))
   }
 
+  const handleDesaClick = async (desaName: string) => {
+    setSelectedDesa(desaName)
+    setShowDesaList(false)
+    await fetchKelompok(desaName)
+    // Reset data when switching desa
+    setAbsensiData({})
+    setExistingData({})
+    setIsEditMode(false)
+    setDataStatus('loading')
+  }
+
+  const handleBackToDesa = () => {
+    setShowDesaList(true)
+    setSelectedDesa('')
+    setKelompokList([])
+    setAbsensiData({})
+    setExistingData({})
+  }
+
   const handleSubmit = async () => {
     try {
       setLoading(true)
@@ -154,12 +228,19 @@ export default function AbsensiPage() {
       // Refresh data setelah submit
       await fetchExistingData()
       
-      // Jika mode insert berhasil, pindah ke bulan saat ini
-      if (!isEditMode) {
+      // Jika mode insert berhasil dan bukan super admin, pindah ke bulan saat ini
+      if (!isEditMode && userRole !== 'super_admin') {
         const currentMonth = new Date().getMonth() + 1
         const currentYear = new Date().getFullYear()
         setSelectedMonth(currentMonth)
         setSelectedYear(currentYear)
+      }
+      
+      // Jika super admin, kembali ke daftar desa setelah berhasil
+      if (userRole === 'super_admin') {
+        setTimeout(() => {
+          handleBackToDesa()
+        }, 1000)
       }
     } catch (error: any) {
       alert(`Error: ${error.message}`)
@@ -178,85 +259,200 @@ export default function AbsensiPage() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Input Absensi</h1>
-        <p className="text-muted-foreground">
-          Input data kehadiran bulanan per kelompok
-        </p>
-      </div>
+  // Show desa list for super admin
+  if (userRole === 'super_admin' && showDesaList) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Input Absensi</h1>
+          <p className="text-muted-foreground">
+            Pilih desa untuk input data kehadiran bulanan
+          </p>
+        </div>
 
-      {/* Filter Periode */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+        {/* Filter Periode */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               Periode Absensi
-            </div>
-            {dataStatus !== 'loading' && (
-              <div className="flex items-center gap-2">
-                {dataStatus === 'existing' ? (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                    <CheckCircle className="h-4 w-4" />
-                    Data Tersimpan
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    Belum Ada Data
-                  </div>
-                )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <div className="space-y-2">
+                <Label>Bulan</Label>
+                <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Januari</SelectItem>
+                    <SelectItem value="2">Februari</SelectItem>
+                    <SelectItem value="3">Maret</SelectItem>
+                    <SelectItem value="4">April</SelectItem>
+                    <SelectItem value="5">Mei</SelectItem>
+                    <SelectItem value="6">Juni</SelectItem>
+                    <SelectItem value="7">Juli</SelectItem>
+                    <SelectItem value="8">Agustus</SelectItem>
+                    <SelectItem value="9">September</SelectItem>
+                    <SelectItem value="10">Oktober</SelectItem>
+                    <SelectItem value="11">November</SelectItem>
+                    <SelectItem value="12">Desember</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="space-y-2">
-              <Label>Bulan</Label>
-              <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Januari</SelectItem>
-                  <SelectItem value="2">Februari</SelectItem>
-                  <SelectItem value="3">Maret</SelectItem>
-                  <SelectItem value="4">April</SelectItem>
-                  <SelectItem value="5">Mei</SelectItem>
-                  <SelectItem value="6">Juni</SelectItem>
-                  <SelectItem value="7">Juli</SelectItem>
-                  <SelectItem value="8">Agustus</SelectItem>
-                  <SelectItem value="9">September</SelectItem>
-                  <SelectItem value="10">Oktober</SelectItem>
-                  <SelectItem value="11">November</SelectItem>
-                  <SelectItem value="12">Desember</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label>Tahun</Label>
+                <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 16 }, (_, i) => {
+                      const year = 2025 + i
+                      return (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Tahun</Label>
-              <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 16 }, (_, i) => {
-                    const year = 2025 + i
-                    return (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
+          </CardContent>
+        </Card>
+
+        {/* Daftar Desa */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Pilih Desa untuk Input Absensi
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                'Kalideres', 'Kapuk Melati', 'Jelambar', 'Cengkareng',
+                'Kebon Jahe', 'Bandara', 'Taman Kota', 'Cipondoh'
+              ].map((desaName) => (
+                <Card 
+                  key={desaName} 
+                  className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
+                  onClick={() => handleDesaClick(desaName)}
+                >
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <h3 className="font-semibold text-lg mb-2">{desaName}</h3>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Klik untuk input absensi
+                      </p>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Input Absensi
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Input Absensi {selectedDesa && `- ${selectedDesa}`}
+          </h1>
+          <p className="text-muted-foreground">
+            Input data kehadiran bulanan per kelompok
+          </p>
+        </div>
+        {userRole === 'super_admin' && selectedDesa && (
+          <Button variant="outline" onClick={handleBackToDesa}>
+            ← Kembali ke Daftar Desa
+          </Button>
+        )}
+      </div>
+
+      {/* Filter Periode - hanya tampil jika bukan super admin atau sudah pilih desa */}
+      {(userRole !== 'super_admin' || selectedDesa) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Periode Absensi {selectedDesa && `- ${selectedDesa}`}
+              </div>
+              {dataStatus !== 'loading' && (
+                <div className="flex items-center gap-2">
+                  {dataStatus === 'existing' ? (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                      <CheckCircle className="h-4 w-4" />
+                      Data Tersimpan
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Belum Ada Data
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <div className="space-y-2">
+                <Label>Bulan</Label>
+                <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Januari</SelectItem>
+                    <SelectItem value="2">Februari</SelectItem>
+                    <SelectItem value="3">Maret</SelectItem>
+                    <SelectItem value="4">April</SelectItem>
+                    <SelectItem value="5">Mei</SelectItem>
+                    <SelectItem value="6">Juni</SelectItem>
+                    <SelectItem value="7">Juli</SelectItem>
+                    <SelectItem value="8">Agustus</SelectItem>
+                    <SelectItem value="9">September</SelectItem>
+                    <SelectItem value="10">Oktober</SelectItem>
+                    <SelectItem value="11">November</SelectItem>
+                    <SelectItem value="12">Desember</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Tahun</Label>
+                <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 16 }, (_, i) => {
+                      const year = 2025 + i
+                      return (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -314,7 +510,12 @@ export default function AbsensiPage() {
                   hasExistingData ? 'border-green-200 bg-green-50' : 'border-gray-200'
                 } ${isDataChanged ? 'border-blue-300 bg-blue-50' : ''}`}>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">{kelompok.nama_kelompok}</h3>
+                    <h3 className="font-medium">
+                      {kelompok.nama_kelompok}
+                      {kelompok.desa_name && userRole === 'super_admin' && (
+                        <span className="text-sm text-muted-foreground ml-2">({kelompok.desa_name})</span>
+                      )}
+                    </h3>
                     {hasExistingData && (
                       <div className="flex items-center gap-1 text-xs text-green-600">
                         <CheckCircle className="h-3 w-3" />

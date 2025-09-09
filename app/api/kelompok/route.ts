@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
     }
 
     const user = JSON.parse(sessionCookie)
+    const { searchParams } = new URL(request.url)
+    const desaName = searchParams.get('desa')
     
     let query = supabase
       .from('kelompok')
@@ -31,6 +33,17 @@ export async function GET(request: NextRequest) {
     // Filter berdasarkan role dan desa
     if (user.role === 'koordinator_desa' && user.desa_id) {
       query = query.eq('desa_id', user.desa_id)
+    } else if (desaName && user.role === 'super_admin') {
+      // Super admin bisa filter berdasarkan nama desa
+      const { data: desaData } = await supabase
+        .from('desa')
+        .select('id')
+        .eq('nama_desa', desaName)
+        .single()
+      
+      if (desaData) {
+        query = query.eq('desa_id', desaData.id)
+      }
     }
     
     const { data: kelompok, error } = await query
