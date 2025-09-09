@@ -4,13 +4,18 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BarChart3, Download, FileText, Calendar } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { BarChart3, Download, FileText, Calendar, X } from 'lucide-react'
 
 export default function LaporanPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
   const [selectedYear, setSelectedYear] = useState('2025')
   const [laporanData, setLaporanData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [detailData, setDetailData] = useState<any[]>([])
+  const [selectedDesa, setSelectedDesa] = useState('')
+  const [detailLoading, setDetailLoading] = useState(false)
 
   useEffect(() => {
     fetchLaporanData()
@@ -51,6 +56,28 @@ export default function LaporanPage() {
 
   const handlePrint = () => {
     window.print()
+  }
+
+  const handleDesaClick = async (desaName: string) => {
+    try {
+      setDetailLoading(true)
+      setSelectedDesa(desaName)
+      setModalOpen(true)
+      
+      const response = await fetch(`/api/laporan/detail?desa=${encodeURIComponent(desaName)}&bulan=${selectedMonth}&tahun=${selectedYear}`)
+      const result = await response.json()
+      
+      if (response.ok && result.data) {
+        setDetailData(result.data)
+      } else {
+        setDetailData([])
+      }
+    } catch (error) {
+      console.error('Error fetching detail data:', error)
+      setDetailData([])
+    } finally {
+      setDetailLoading(false)
+    }
   }
 
   if (loading) {
@@ -211,7 +238,14 @@ export default function LaporanPage() {
                     const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
                     return (
                       <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="p-3 font-medium">{item.desa}</td>
+                        <td className="p-3 font-medium">
+                          <button 
+                            onClick={() => handleDesaClick(item.desa)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          >
+                            {item.desa}
+                          </button>
+                        </td>
                         <td className="p-3 text-center">{item.target}</td>
                         <td className="p-3 text-center">{item.hadir}</td>
                         <td className="p-3 text-center font-bold">{persentase.toFixed(1)}%</td>
@@ -254,6 +288,103 @@ export default function LaporanPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal Detail Desa */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Detail Desa {selectedDesa} - {selectedMonth}/{selectedYear}</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setModalOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {detailLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p>Loading detail data...</p>
+              </div>
+            </div>
+          ) : detailData.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Tidak ada data detail untuk desa ini</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Kelompok</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Target Putra</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Hadir Putra</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Target Putri</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Hadir Putri</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Total Target</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Total Hadir</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Persentase</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailData.map((item, index) => {
+                      const persentase = item.total_target > 0 ? (item.total_hadir / item.total_target) * 100 : 0
+                      return (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="border border-gray-300 px-4 py-2 font-medium">{item.kelompok}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center">{item.target_putra}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center">{item.hadir_putra}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center">{item.target_putri}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center">{item.hadir_putri}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center font-bold">{item.total_target}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center font-bold">{item.total_hadir}</td>
+                          <td className="border border-gray-300 px-4 py-2 text-center font-bold">{persentase.toFixed(1)}%</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-100 font-bold">
+                      <td className="border border-gray-300 px-4 py-2">TOTAL {selectedDesa.toUpperCase()}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.target_putra, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.hadir_putra, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.target_putri, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.hadir_putri, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.total_target, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {detailData.reduce((sum, item) => sum + item.total_hadir, 0)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {(() => {
+                          const totalTarget = detailData.reduce((sum, item) => sum + item.total_target, 0)
+                          const totalHadir = detailData.reduce((sum, item) => sum + item.total_hadir, 0)
+                          return totalTarget > 0 ? ((totalHadir / totalTarget) * 100).toFixed(1) : 0
+                        })()}%
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
