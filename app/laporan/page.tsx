@@ -19,11 +19,11 @@ export default function LaporanPage() {
   const fetchLaporanData = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/absensi?bulan=${selectedMonth}&tahun=${selectedYear}`)
+      const response = await fetch(`/api/laporan?bulan=${selectedMonth}&tahun=${selectedYear}`)
       const result = await response.json()
       
       if (response.ok && result.data && result.data.length > 0) {
-        // Gunakan data real dari database
+        // Data sudah di-aggregate dari API
         setLaporanData(result.data)
       } else {
         // Jika belum ada data, tampilkan pesan kosong

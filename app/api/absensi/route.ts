@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     if (user.role === 'koordinator_desa' && user.desa_id) {
       query = query.eq('kelompok.desa_id', user.desa_id)
     }
+    // Super admin dan role lain melihat semua data (tidak ada filter)
     
     if (bulan) query = query.eq('bulan', bulan)
     if (tahun) query = query.eq('tahun', tahun)
