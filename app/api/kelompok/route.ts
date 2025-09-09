@@ -132,7 +132,13 @@ export async function PUT(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('kelompok')
-      .update({ nama_kelompok, desa_id, target_putra, target_putri })
+      .update({ 
+        nama_kelompok, 
+        desa_id, 
+        target_putra, 
+        target_putri,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id)
       .select()
       .single()
