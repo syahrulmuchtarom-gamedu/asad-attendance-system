@@ -82,6 +82,7 @@ export default function LaporanDesaPage() {
       
       // Transform data untuk export
       const exportData = [{
+        desa_id: 1,
         nama_desa: namaDesa,
         total_kelompok: laporanData.length,
         total_target_putra: totalTargetPutra,
@@ -108,6 +109,7 @@ export default function LaporanDesaPage() {
       
       // Transform data untuk export
       const exportData = [{
+        desa_id: 1,
         nama_desa: namaDesa,
         total_kelompok: laporanData.length,
         total_target_putra: totalTargetPutra,
