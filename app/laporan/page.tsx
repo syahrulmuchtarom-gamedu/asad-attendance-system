@@ -293,15 +293,8 @@ export default function LaporanPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Detail Desa {selectedDesa} - {selectedMonth}/{selectedYear}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setModalOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            <DialogTitle>
+              Detail Desa {selectedDesa} - {selectedMonth}/{selectedYear}
             </DialogTitle>
           </DialogHeader>
           
