@@ -156,8 +156,8 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Update existing data
-    const { data: updatedAbsensi, error } = await supabase
+    // Try to update first, if no rows affected, insert instead (UPSERT)
+    const { data: updatedAbsensi, error: updateError } = await supabase
       .from('absensi')
       .update({
         hadir_putra: data.hadir_putra,
@@ -168,11 +168,38 @@ export async function PUT(request: NextRequest) {
       .eq('bulan', data.bulan)
       .eq('tahun', data.tahun)
       .select()
-      .single()
 
-    if (error) {
-      console.error('Update absensi error:', error)
-      throw error
+    // If update found no rows, insert new data
+    if (updateError && updateError.code === 'PGRST116') {
+      console.log('No existing data found, inserting new record...')
+      
+      const { data: newAbsensi, error: insertError } = await supabase
+        .from('absensi')
+        .insert({
+          kelompok_id: data.kelompok_id,
+          bulan: data.bulan,
+          tahun: data.tahun,
+          hadir_putra: data.hadir_putra,
+          hadir_putri: data.hadir_putri,
+          input_by: user.id
+        })
+        .select()
+        .single()
+
+      if (insertError) {
+        console.error('Insert absensi error:', insertError)
+        throw insertError
+      }
+
+      return NextResponse.json({ 
+        message: 'Data absensi berhasil disimpan',
+        data: newAbsensi 
+      })
+    }
+    
+    if (updateError) {
+      console.error('Update absensi error:', updateError)
+      throw updateError
     }
 
     return NextResponse.json({ 
