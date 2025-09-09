@@ -66,16 +66,21 @@ export default function AbsensiPage() {
         const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
         if (sessionCookie) {
           const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
+          console.log('🔍 User role detected:', sessionData.role)
           setUserRole(sessionData.role)
           if (sessionData.role === 'super_admin') {
+            console.log('✅ Setting showDesaList = true for super_admin')
             setShowDesaList(true)
           } else {
+            console.log('✅ Setting showDesaList = false for role:', sessionData.role)
             setShowDesaList(false)
           }
+        } else {
+          console.log('❌ No session cookie found')
         }
       }
     } catch (error) {
-      console.error('Error getting user role:', error)
+      console.error('❌ Error getting user role:', error)
     }
   }
 
@@ -234,7 +239,7 @@ export default function AbsensiPage() {
       await fetchExistingData()
       
       // Jika mode insert berhasil dan bukan super admin, pindah ke bulan saat ini
-      if (!isEditMode && !isSuperAdmin) {
+      if (!isEditMode && userRole !== 'super_admin') {
         const currentMonth = new Date().getMonth() + 1
         const currentYear = new Date().getFullYear()
         setSelectedMonth(currentMonth)
@@ -242,7 +247,7 @@ export default function AbsensiPage() {
       }
       
       // Jika super admin, kembali ke daftar desa setelah berhasil
-      if (isSuperAdmin) {
+      if (userRole === 'super_admin') {
         setTimeout(() => {
           handleBackToDesa()
         }, 1000)
@@ -264,21 +269,11 @@ export default function AbsensiPage() {
     )
   }
 
-  // Check if user is super admin from cookie directly
-  const isSuperAdmin = isClient && typeof window !== 'undefined' && (() => {
-    try {
-      const cookies = document.cookie.split(';')
-      const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
-      if (sessionCookie) {
-        const sessionData = JSON.parse(decodeURIComponent(sessionCookie.split('=')[1]))
-        return sessionData.role === 'super_admin'
-      }
-    } catch (e) {}
-    return false
-  })()
+  console.log('🎯 Render state:', { userRole, showDesaList, isClient, kelompokCount: kelompokList.length })
   
-  // Show desa list ONLY for super admin
-  if (isSuperAdmin && isClient) {
+  // Show desa list for super admin when showDesaList is true
+  if (userRole === 'super_admin' && showDesaList && isClient) {
+    console.log('📋 Rendering desa list for super admin')
     return (
       <div className="space-y-6">
         <div>
@@ -393,7 +388,7 @@ export default function AbsensiPage() {
             Input data kehadiran bulanan per kelompok
           </p>
         </div>
-        {isSuperAdmin && selectedDesa && (
+        {userRole === 'super_admin' && selectedDesa && (
           <Button variant="outline" onClick={handleBackToDesa}>
             ← Kembali ke Daftar Desa
           </Button>
@@ -401,7 +396,7 @@ export default function AbsensiPage() {
       </div>
 
       {/* Filter Periode - tampil untuk koordinator desa atau super admin yang sudah pilih desa */}
-      {(!isSuperAdmin || selectedDesa) && (
+      {(userRole !== 'super_admin' || selectedDesa) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -531,7 +526,7 @@ export default function AbsensiPage() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">
                       {kelompok.nama_kelompok}
-                      {kelompok.desa_name && isSuperAdmin && (
+                      {kelompok.desa_name && userRole === 'super_admin' && (
                         <span className="text-sm text-muted-foreground ml-2">({kelompok.desa_name})</span>
                       )}
                     </h3>
@@ -580,7 +575,10 @@ export default function AbsensiPage() {
           </div>
           
           <div className="mt-6 flex justify-end">
-            <Button onClick={handleSubmit} disabled={loading || dataStatus === 'loading'}>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={loading || dataStatus === 'loading' || kelompokList.length === 0}
+            >
               {isEditMode ? (
                 <Edit className="mr-2 h-4 w-4" />
               ) : (
