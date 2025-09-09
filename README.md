@@ -1,4 +1,4 @@
-# Website Absensi Penderesan ASAD Padepokan Jakarta Barat Cengkareng
+# Absensi Penderesan ASAD
 
 Website absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa > Kelompok. Sistem mendukung input absensi bulanan dengan perhitungan persentase kehadiran otomatis dan fitur drill-down laporan.
 
@@ -335,4 +335,4 @@ Untuk support dan pertanyaan:
 
 ---
 
-**Dibuat dengan ❤️ untuk Organisasi ASAD Padepokan Jakarta Barat Cengkareng**
+**Dibuat dengan ❤️ untuk Organisasi ASAD**
