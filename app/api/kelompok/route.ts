@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
     }
 
     const user = JSON.parse(sessionCookie)
+    console.log('🔍 Kelompok API - User data:', { role: user.role, desa_id: user.desa_id, username: user.username })
+    
     const { searchParams } = new URL(request.url)
     const desaName = searchParams.get('desa')
     
@@ -32,8 +34,10 @@ export async function GET(request: NextRequest) {
     
     // Filter berdasarkan role dan desa
     if (user.role === 'koordinator_desa' && user.desa_id) {
+      console.log('✅ Filtering kelompok for koordinator_desa, desa_id:', user.desa_id)
       query = query.eq('desa_id', user.desa_id)
     } else if (desaName && user.role === 'super_admin') {
+      console.log('✅ Filtering kelompok for super_admin, desa:', desaName)
       // Super admin bisa filter berdasarkan nama desa
       const { data: desaData } = await supabase
         .from('desa')
@@ -66,6 +70,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log('📊 Returning kelompok count:', kelompokWithDesa.length)
     return NextResponse.json(kelompokWithDesa)
   } catch (error) {
     console.error('API Error:', error)
