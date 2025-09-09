@@ -108,11 +108,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const cookieStore = request.cookies
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
+    
+    // Hanya super_admin yang bisa edit kelompok
+    if (user.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id, nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
 
-    if (!id || !nama_kelompok || !desa_id || !target_putra || !target_putri) {
+    if (!id || !nama_kelompok || !desa_id || target_putra === undefined || target_putri === undefined) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 })
     }
+
+    console.log('Updating kelompok:', { id, nama_kelompok, desa_id, target_putra, target_putri })
 
     const { data, error } = await supabase
       .from('kelompok')
@@ -121,7 +137,10 @@ export async function PUT(request: NextRequest) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Update kelompok error:', error)
+      throw error
+    }
 
     // Get desa name separately
     const { data: desaData } = await supabase
@@ -134,13 +153,30 @@ export async function PUT(request: NextRequest) {
       ...data,
       desa_name: desaData?.nama_desa || 'Unknown'
     })
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update kelompok' }, { status: 500 })
+  } catch (error: any) {
+    console.error('PUT kelompok error:', error)
+    return NextResponse.json({ 
+      error: error.message || 'Failed to update kelompok' 
+    }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const cookieStore = request.cookies
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = JSON.parse(sessionCookie)
+    
+    // Hanya super_admin yang bisa hapus kelompok
+    if (user.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -156,7 +192,9 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete kelompok' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ 
+      error: error.message || 'Failed to delete kelompok' 
+    }, { status: 500 })
   }
 }
