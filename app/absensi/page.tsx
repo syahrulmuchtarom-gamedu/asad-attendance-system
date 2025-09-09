@@ -64,14 +64,32 @@ export default function AbsensiPage() {
     try {
       if (typeof window !== 'undefined') {
         console.log('🍪 All cookies:', document.cookie)
+        
+        // TRY COOKIE FIRST
         const cookies = document.cookie.split(';')
         const sessionCookie = cookies.find(c => c.trim().startsWith('user_session='))
         
+        let sessionData = null
+        
         if (sessionCookie) {
           const cookieValue = sessionCookie.split('=')[1]
-          console.log('🔑 Raw cookie value:', cookieValue)
-          const sessionData = JSON.parse(decodeURIComponent(cookieValue))
-          console.log('🔍 User role detected:', sessionData.role)
+          console.log('🔑 Found cookie, parsing...')
+          sessionData = JSON.parse(decodeURIComponent(cookieValue))
+          console.log('✅ User from COOKIE:', sessionData.role)
+        } else {
+          console.log('❌ No cookie found, trying localStorage...')
+          
+          // FALLBACK TO LOCALSTORAGE
+          const localData = localStorage.getItem('user_session')
+          if (localData) {
+            sessionData = JSON.parse(localData)
+            console.log('✅ User from LOCALSTORAGE:', sessionData.role)
+          } else {
+            console.log('❌ No session data found anywhere')
+          }
+        }
+        
+        if (sessionData && sessionData.role) {
           setUserRole(sessionData.role)
           setIsLoading(false)
           
@@ -83,16 +101,13 @@ export default function AbsensiPage() {
             setShowDesaList(false)
           }
         } else {
-          console.log('❌ No session cookie found')
-          console.log('🔍 Available cookies:', cookies)
+          console.log('❌ No valid session data')
           setIsLoading(false)
-          // Don't redirect here, let layout handle it
         }
       }
     } catch (error) {
       console.error('❌ Error getting user role:', error)
       setIsLoading(false)
-      // Don't redirect here, let layout handle it
     }
   }
 

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     
     console.log('Cookie set successfully for user:', user.username)
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -70,23 +70,6 @@ export async function POST(request: NextRequest) {
         desa_id: user.desa_id
       }
     })
-    
-    // ALSO SET COOKIE IN RESPONSE HEADERS AS BACKUP
-    response.cookies.set('user_session', JSON.stringify({
-      id: user.id,
-      username: user.username,
-      full_name: user.full_name,
-      role: user.role,
-      desa_id: user.desa_id
-    }), {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/'
-    })
-    
-    return response
 
   } catch (error) {
     console.error('Login error:', error)

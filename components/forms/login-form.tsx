@@ -57,12 +57,16 @@ export function LoginForm() {
         return
       }
 
+      // SAVE TO LOCALSTORAGE AS BACKUP
+      localStorage.setItem('user_session', JSON.stringify(result.user))
+      console.log('✅ User data saved to localStorage:', result.user)
+      
       toast({
         title: "Login Berhasil",
         description: "Selamat datang di Sistem Absensi ASAD",
       })
 
-      // Force reload to ensure cookie is set
+      // Force reload to ensure session is set
       window.location.href = '/dashboard'
     } catch (error) {
       console.error('Login error:', error)
