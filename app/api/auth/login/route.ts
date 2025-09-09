@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     
     console.log('Login successful for user:', user.username)
 
-    // Set session cookie
+    // Set session cookie - ACCESSIBLE BY JAVASCRIPT
     const cookieStore = cookies()
     cookieStore.set('user_session', JSON.stringify({
       id: user.id,
@@ -51,13 +51,16 @@ export async function POST(request: NextRequest) {
       role: user.role,
       desa_id: user.desa_id
     }), {
-      httpOnly: true,
+      httpOnly: false, // ALLOW JAVASCRIPT ACCESS
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/' // ENSURE COOKIE AVAILABLE ON ALL PATHS
     })
+    
+    console.log('Cookie set successfully for user:', user.username)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -67,6 +70,23 @@ export async function POST(request: NextRequest) {
         desa_id: user.desa_id
       }
     })
+    
+    // ALSO SET COOKIE IN RESPONSE HEADERS AS BACKUP
+    response.cookies.set('user_session', JSON.stringify({
+      id: user.id,
+      username: user.username,
+      full_name: user.full_name,
+      role: user.role,
+      desa_id: user.desa_id
+    }), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/'
+    })
+    
+    return response
 
   } catch (error) {
     console.error('Login error:', error)
