@@ -9,6 +9,7 @@ Website absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa
 - **Koordinator Desa**: Input absensi untuk kelompok di desanya saja
 - **Koordinator Daerah**: View semua laporan daerah
 - **Viewer**: View dan print laporan
+- **Astrida**: Input absensi semua desa + view laporan semua desa (tanpa user management & master data)
 
 ### Dashboard per Role
 - **Super Admin**: Overview semua desa, user management, master data, input absensi per desa
@@ -43,6 +44,7 @@ Website absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa
 
 - **Frontend**: Next.js 14 dengan App Router
 - **Styling**: Tailwind CSS + Shadcn/ui components
+- **Theme System**: next-themes dengan smooth dark mode
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Custom session dengan Cookie + localStorage fallback
 - **State Management**: React useState/useEffect
@@ -103,6 +105,7 @@ NEXTAUTH_URL=http://localhost:3000
 - Buat project baru di Supabase
 - Jalankan SQL schema dari file `supabase-schema.sql`
 - Jalankan SQL untuk test users: `create-super-admin.sql`
+- Jalankan SQL untuk user Astrida: `create-astrida-user.sql`
 - Perbaiki desa_id koordinator: `fix-koordinator-desa-id.sql`
 - Pastikan semua koordinator desa punya desa_id yang benar
 
@@ -160,6 +163,7 @@ Middleware otomatis melindungi route berdasarkan role:
 - `/dashboard/koordinator-desa/*` - Hanya Koordinator Desa
 - `/dashboard/koordinator-daerah/*` - Hanya Koordinator Daerah
 - `/dashboard/viewer/*` - Hanya Viewer
+- `/dashboard/astrida/*` - Hanya Astrida
 - `/absensi` - Super Admin (semua desa) + Koordinator Desa (desa sendiri) + Astrida (semua desa)
 - `/laporan` - Semua role dengan filter sesuai akses
 
@@ -250,13 +254,16 @@ NEXTAUTH_URL=https://your-domain.vercel.app
 
 ### Manual Testing Checklist
 - [x] Login/logout functionality (cookie + localStorage)
-- [x] Role-based access control (Super Admin vs Koordinator Desa)
+- [x] Role-based access control (Super Admin vs Koordinator Desa vs Astrida)
 - [x] Super Admin: Desa selector → Input kelompok
+- [x] Astrida: Desa selector → Input kelompok (sama seperti Super Admin)
 - [x] Koordinator Desa: Langsung form kelompok desanya (filtered by desa_id)
 - [x] UPSERT functionality (insert baru + update existing)
 - [x] Laporan dengan drill-down (klik desa → detail kelompok)
 - [x] Real-time aggregation dan filtering
 - [x] Visual indicators (data tersimpan, data diubah)
+- [x] Dark mode functionality (Light/Dark/System toggle)
+- [x] Theme persistence dan smooth transitions
 - [ ] Export functionality (PDF/Excel - planned)
 - [x] Print layouts
 - [x] Mobile responsiveness
@@ -268,9 +275,23 @@ Buat test users untuk setiap role:
 INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
 ('admin', 'admin123', 'Super Administrator', 'super_admin', NULL, true);
 
+-- Astrida User
+INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
+('astrida', 'astrida123', 'Astrida User', 'astrida', NULL, true);
+
 -- Koordinator Desa (harus punya desa_id yang valid)
 INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
 ('koordinator_kalideres', 'kalideres123', 'Koordinator Kalideres', 'koordinator_desa', 
+ (SELECT id FROM desa WHERE nama_desa = 'Kalideres'), true);
+
+-- Koordinator Daerah
+INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
+('koordinator_daerah', 'daerah123', 'Koordinator Daerah', 'koordinator_daerah', NULL, true);
+
+-- Viewer
+INSERT INTO users (username, password, full_name, role, desa_id, is_active) VALUES 
+('viewer', 'viewer123', 'Viewer User', 'viewer', NULL, true);
+```oordinator_desa', 
  (SELECT id FROM desa WHERE nama_desa = 'Kalideres'), true);
 
 -- Perbaiki desa_id untuk koordinator yang sudah ada
@@ -327,6 +348,19 @@ Untuk support dan pertanyaan:
 - Issues: [GitHub Issues](link-to-issues)
 
 ## 🔄 Changelog
+
+### v1.1.0 (2025-01-10)
+- ✅ **Dark Mode System**: Smooth theme transitions dengan next-themes
+- ✅ **Astrida Role**: Role khusus dengan akses input absensi semua desa + laporan
+- ✅ **Theme Features**: 
+  - Default light mode dengan user toggle
+  - Light/Dark/System options
+  - WCAG compliant colors (#1a1a1a backgrounds, #e5e5e5 text)
+  - Smooth cubic-bezier transitions (0.3s duration)
+  - Theme persistence di localStorage
+  - Accessibility support (prefers-reduced-motion)
+- ✅ **Enhanced UI**: All components mendukung dark mode
+- ✅ **User Management**: Dropdown role di form user sudah include Astrida
 
 ### v1.0.0 (2025-01-09)
 - ✅ **Authentication System**: Custom session dengan cookie + localStorage fallback
