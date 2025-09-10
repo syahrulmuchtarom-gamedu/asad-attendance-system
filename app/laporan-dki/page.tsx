@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Download, FileText, Calendar, BarChart3 } from 'lucide-react'
+import { Download, FileText, Calendar, BarChart3, ArrowLeft } from 'lucide-react'
 
 interface LaporanDKIData {
   bulan: number
@@ -75,6 +75,10 @@ export default function LaporanDKIPage() {
     window.print()
   }
 
+  const handleBack = () => {
+    window.history.back()
+  }
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>
   }
@@ -85,10 +89,14 @@ export default function LaporanDKIPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Laporan DKI Jakarta</h1>
           <p className="text-muted-foreground">
-            Agregasi kehadiran putra dan putri seluruh Jakarta per bulan
+            Agregasi kehadiran putra dan putri seluruh Jakarta Barat Cengkareng per bulan
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Kembali
+          </Button>
           <Button onClick={handlePrint}>
             <FileText className="mr-2 h-4 w-4" />
             Print
