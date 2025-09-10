@@ -46,7 +46,7 @@ export default function AbsensiPage() {
   
   useEffect(() => {
     if (userRole) {
-      if (userRole === 'super_admin') {
+      if (userRole === 'super_admin' || userRole === 'astrida') {
         fetchDesaList()
       } else {
         fetchKelompok()
@@ -93,8 +93,8 @@ export default function AbsensiPage() {
           setUserRole(sessionData.role)
           setIsLoading(false)
           
-          if (sessionData.role === 'super_admin') {
-            console.log('✅ Setting showDesaList = true for super_admin')
+          if (sessionData.role === 'super_admin' || sessionData.role === 'astrida') {
+            console.log('✅ Setting showDesaList = true for super_admin/astrida')
             setShowDesaList(true)
           } else {
             console.log('✅ Setting showDesaList = false for role:', sessionData.role)
@@ -247,8 +247,8 @@ export default function AbsensiPage() {
         setSelectedYear(currentYear)
       }
       
-      // Jika super admin, kembali ke daftar desa setelah berhasil
-      if (userRole === 'super_admin') {
+      // Jika super admin atau astrida, kembali ke daftar desa setelah berhasil
+      if (userRole === 'super_admin' || userRole === 'astrida') {
         setTimeout(() => {
           handleBackToDesa()
         }, 1000)
@@ -284,9 +284,9 @@ export default function AbsensiPage() {
     )
   }
   
-  // SHOW DESA LIST FOR SUPER ADMIN ONLY WHEN showDesaList = true
-  if (userRole === 'super_admin' && showDesaList && isClient) {
-    console.log('📋 FORCE Rendering desa list for super admin')
+  // SHOW DESA LIST FOR SUPER ADMIN & ASTRIDA WHEN showDesaList = true
+  if ((userRole === 'super_admin' || userRole === 'astrida') && showDesaList && isClient) {
+    console.log('📋 FORCE Rendering desa list for super admin/astrida')
     return (
       <div className="space-y-6">
         <div>
@@ -401,7 +401,7 @@ export default function AbsensiPage() {
             Input data kehadiran bulanan per kelompok
           </p>
         </div>
-        {userRole === 'super_admin' && selectedDesa && (
+        {(userRole === 'super_admin' || userRole === 'astrida') && selectedDesa && (
           <Button variant="outline" onClick={handleBackToDesa}>
             ← Kembali ke Daftar Desa
           </Button>
@@ -409,7 +409,7 @@ export default function AbsensiPage() {
       </div>
 
       {/* Filter Periode - tampil untuk koordinator desa atau super admin yang sudah pilih desa */}
-      {(userRole !== 'super_admin' || selectedDesa) && (
+      {((userRole !== 'super_admin' && userRole !== 'astrida') || selectedDesa) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -539,7 +539,7 @@ export default function AbsensiPage() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">
                       {kelompok.nama_kelompok}
-                      {kelompok.desa_name && userRole === 'super_admin' && (
+                      {kelompok.desa_name && (userRole === 'super_admin' || userRole === 'astrida') && (
                         <span className="text-sm text-muted-foreground ml-2">({kelompok.desa_name})</span>
                       )}
                     </h3>
