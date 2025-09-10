@@ -100,7 +100,7 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-bold text-gray-900">ASAD</h1>
+            <h1 className="text-lg font-bold text-gray-900">ASAD Absensi</h1>
             <Button
               variant="ghost"
               size="icon"
@@ -129,7 +129,10 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-gray-900">Absensi Penderesan ASAD</h1>
+            <h1 className="text-lg font-bold text-gray-900 truncate">
+              <span className="hidden xl:inline">Absensi Penderesan ASAD</span>
+              <span className="xl:hidden">ASAD Absensi</span>
+            </h1>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigationItems.map((item) => (
