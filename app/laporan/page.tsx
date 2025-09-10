@@ -282,11 +282,11 @@ export default function LaporanPage() {
                   {laporanData.map((item, index) => {
                     const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
                     return (
-                      <tr key={index} className="border-b hover:bg-gray-50">
+                      <tr key={index} className="border-b hover:bg-muted/50">
                         <td className="p-3 font-medium">
                           <button 
                             onClick={() => handleDesaClick(item.desa)}
-                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                            className="text-primary hover:text-primary/80 hover:underline font-medium"
                           >
                             {item.desa}
                           </button>
@@ -296,9 +296,9 @@ export default function LaporanPage() {
                         <td className="p-3 text-center font-bold">{persentase.toFixed(1)}%</td>
                         <td className="p-3 text-center">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            persentase >= 90 ? 'bg-green-100 text-green-800' :
-                            persentase >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
+                            persentase >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                            persentase >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
                           }`}>
                             {persentase >= 90 ? 'Sangat Baik' :
                              persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
@@ -310,16 +310,16 @@ export default function LaporanPage() {
                 </tbody>
                 {laporanData.length > 0 && (
                   <tfoot>
-                    <tr className="border-t-2 bg-gray-50">
+                    <tr className="border-t-2 bg-muted/50">
                       <td className="p-3 font-bold">TOTAL</td>
                       <td className="p-3 text-center font-bold">{totalTarget}</td>
                       <td className="p-3 text-center font-bold">{totalHadir}</td>
                       <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
                       <td className="p-3 text-center">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          overallPercentage >= 90 ? 'bg-green-100 text-green-800' :
-                          overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
+                          overallPercentage >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                          overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
                         }`}>
                           {overallPercentage >= 90 ? 'Sangat Baik' :
                            overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
@@ -359,7 +359,7 @@ export default function LaporanPage() {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-300">
                   <thead>
-                    <tr className="bg-gray-50">
+                    <tr className="bg-muted/30">
                       <th className="border border-gray-300 px-4 py-2 text-left font-medium">Kelompok</th>
                       <th className="border border-gray-300 px-4 py-2 text-center font-medium">Target Putra</th>
                       <th className="border border-gray-300 px-4 py-2 text-center font-medium">Hadir Putra</th>
@@ -374,7 +374,7 @@ export default function LaporanPage() {
                     {detailData.map((item, index) => {
                       const persentase = item.total_target > 0 ? (item.total_hadir / item.total_target) * 100 : 0
                       return (
-                        <tr key={index} className="hover:bg-gray-50">
+                        <tr key={index} className="hover:bg-muted/50">
                           <td className="border border-gray-300 px-4 py-2 font-medium">{item.kelompok}</td>
                           <td className="border border-gray-300 px-4 py-2 text-center">{item.target_putra}</td>
                           <td className="border border-gray-300 px-4 py-2 text-center">{item.hadir_putra}</td>
@@ -388,7 +388,7 @@ export default function LaporanPage() {
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-gray-100 font-bold">
+                    <tr className="bg-muted/50 font-bold">
                       <td className="border border-gray-300 px-4 py-2">TOTAL {selectedDesa.toUpperCase()}</td>
                       <td className="border border-gray-300 px-4 py-2 text-center">
                         {detailData.reduce((sum, item) => sum + item.target_putra, 0)}
