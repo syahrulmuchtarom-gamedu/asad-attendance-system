@@ -179,6 +179,7 @@ export default function UsersPage() {
                   <option value="koordinator_desa">Koordinator Desa</option>
                   <option value="koordinator_daerah">Koordinator Daerah</option>
                   <option value="viewer">Viewer</option>
+                  <option value="astrida">Astrida</option>
                 </select>
               </div>
               {editingUser && (
