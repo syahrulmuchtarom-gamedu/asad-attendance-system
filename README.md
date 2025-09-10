@@ -15,6 +15,7 @@ Website absensi web untuk organisasi ASAD dengan struktur hierarki Daerah > Desa
 - **Koordinator Desa**: Form input absensi langsung untuk kelompok desanya
 - **Koordinator Daerah**: Laporan real-time semua desa
 - **Viewer**: Laporan read-only dengan fungsi print
+- **Astrida**: Input absensi semua desa + laporan semua desa (tanpa user management)
 
 ### Input Absensi dengan Desa Selector
 - **Super Admin**: Pilih desa dari grid card → Input kelompok desa tersebut
@@ -145,6 +146,7 @@ attendance-system/
 - **koordinator_desa**: Input absensi untuk desa tertentu saja (filtered by desa_id)
 - **koordinator_daerah**: View laporan semua desa
 - **viewer**: Read-only access ke laporan
+- **astrida**: Input absensi semua desa + view laporan semua desa (tanpa user management & master data)
 
 ### Session Management
 - **Primary**: HTTP Cookie dengan user session data
@@ -158,7 +160,7 @@ Middleware otomatis melindungi route berdasarkan role:
 - `/dashboard/koordinator-desa/*` - Hanya Koordinator Desa
 - `/dashboard/koordinator-daerah/*` - Hanya Koordinator Daerah
 - `/dashboard/viewer/*` - Hanya Viewer
-- `/absensi` - Super Admin (semua desa) + Koordinator Desa (desa sendiri)
+- `/absensi` - Super Admin (semua desa) + Koordinator Desa (desa sendiri) + Astrida (semua desa)
 - `/laporan` - Semua role dengan filter sesuai akses
 
 ## 📊 Database Schema

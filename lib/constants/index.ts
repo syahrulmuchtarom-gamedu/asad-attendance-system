@@ -2,14 +2,16 @@ export const USER_ROLES = {
   SUPER_ADMIN: 'super_admin',
   KOORDINATOR_DESA: 'koordinator_desa', 
   KOORDINATOR_DAERAH: 'koordinator_daerah',
-  VIEWER: 'viewer'
+  VIEWER: 'viewer',
+  ASTRIDA: 'astrida'
 } as const
 
 export const ROLE_LABELS = {
   [USER_ROLES.SUPER_ADMIN]: 'Super Admin',
   [USER_ROLES.KOORDINATOR_DESA]: 'Koordinator Desa',
   [USER_ROLES.KOORDINATOR_DAERAH]: 'Koordinator Daerah',
-  [USER_ROLES.VIEWER]: 'Viewer'
+  [USER_ROLES.VIEWER]: 'Viewer',
+  [USER_ROLES.ASTRIDA]: 'Astrida'
 } as const
 
 export const MONTHS = [

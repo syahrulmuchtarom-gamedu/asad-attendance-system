@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     if (user.role === 'koordinator_desa' && user.desa_id) {
       console.log('✅ Filtering kelompok for koordinator_desa, desa_id:', user.desa_id)
       query = query.eq('desa_id', user.desa_id)
-    } else if (desaName && user.role === 'super_admin') {
-      console.log('✅ Filtering kelompok for super_admin, desa:', desaName)
-      // Super admin bisa filter berdasarkan nama desa
+    } else if (desaName && (user.role === 'super_admin' || user.role === 'astrida')) {
+      console.log('✅ Filtering kelompok for super_admin/astrida, desa:', desaName)
+      // Super admin dan astrida bisa filter berdasarkan nama desa
       const { data: desaData } = await supabase
         .from('desa')
         .select('id')

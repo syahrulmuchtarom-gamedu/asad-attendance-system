@@ -21,6 +21,8 @@ export default async function DashboardPage() {
       redirect('/dashboard/koordinator-daerah')
     case 'viewer':
       redirect('/dashboard/viewer')
+    case 'astrida':
+      redirect('/dashboard/astrida')
     default:
       redirect('/login')
   }

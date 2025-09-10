@@ -86,6 +86,12 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
           ...baseItems,
           { name: 'Laporan', href: '/laporan', icon: FileText },
         ]
+      case 'astrida':
+        return [
+          ...baseItems,
+          { name: 'Input Absensi', href: '/absensi', icon: UserCheck },
+          { name: 'Laporan', href: '/laporan', icon: BarChart3 },
+        ]
       default:
         return baseItems
     }

@@ -1,4 +1,4 @@
-export type UserRole = 'super_admin' | 'koordinator_desa' | 'koordinator_daerah' | 'viewer'
+export type UserRole = 'super_admin' | 'koordinator_desa' | 'koordinator_daerah' | 'viewer' | 'astrida'
 
 export interface Profile {
   id: string

@@ -57,6 +57,10 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith('/dashboard/viewer') && user.role !== 'viewer') {
         return NextResponse.redirect(dashboardUrl)
       }
+
+      if (pathname.startsWith('/dashboard/astrida') && user.role !== 'astrida') {
+        return NextResponse.redirect(dashboardUrl)
+      }
     }
 
     return response
