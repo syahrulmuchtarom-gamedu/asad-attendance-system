@@ -85,7 +85,8 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
       case 'viewer':
         return [
           ...baseItems,
-          { name: 'Laporan', href: '/laporan', icon: FileText },
+          { name: 'Laporan', href: '/laporan', icon: BarChart3 },
+          { name: 'Laporan DKI', href: '/laporan-dki', icon: FileText },
         ]
       case 'astrida':
         return [
