@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ClientToaster } from '@/components/client-toaster'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,10 +26,17 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={inter.className}>
-        <main className="min-h-screen bg-background">
-          {children}
-        </main>
-        <ClientToaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <main className="min-h-screen bg-background transition-colors duration-300">
+            {children}
+          </main>
+          <ClientToaster />
+        </ThemeProvider>
       </body>
     </html>
   )

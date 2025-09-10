@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -81,13 +82,17 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Login</CardTitle>
-        <CardDescription className="text-center">
-          Masuk ke Sistem Absensi ASAD
-        </CardDescription>
-      </CardHeader>
+    <div className="relative">
+      <div className="absolute top-4 right-4">
+        <SimpleThemeToggle />
+      </div>
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
+          <CardDescription className="text-center">
+            Masuk ke Sistem Absensi ASAD
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -141,5 +146,6 @@ export function LoginForm() {
         </form>
       </CardContent>
     </Card>
+    </div>
   )
 }

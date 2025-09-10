@@ -184,6 +184,14 @@ Middleware otomatis melindungi route berdasarkan role:
 
 ## 🎨 UI/UX Features
 
+### Dark Mode Support
+- **Smooth theme transitions** with cubic-bezier easing
+- **System preference detection** (auto light/dark)
+- **Manual toggle** with Light/Dark/System options
+- **WCAG compliant** contrast ratios (4.5:1 minimum)
+- **Optimized colors**: #1a1a1a backgrounds, #e5e5e5 text
+- **Accessibility friendly** with reduced motion support
+
 ### Responsive Design
 - Mobile-first approach
 - Breakpoints: mobile (320px+), tablet (768px+), desktop (1024px+)
@@ -192,8 +200,9 @@ Middleware otomatis melindungi route berdasarkan role:
 ### Accessibility
 - Keyboard navigation support
 - Screen reader friendly
-- High contrast colors
+- High contrast colors (light & dark modes)
 - Focus indicators
+- Reduced motion support
 
 ### Print Support
 - Print-optimized layouts

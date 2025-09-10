@@ -17,6 +17,7 @@ import {
   LogOut,
   UserCheck
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Profile } from '@/types'
 import { ROLE_LABELS } from '@/lib/constants'
 
@@ -191,9 +192,10 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1" />
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
+              <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:bg-gray-700" />
               <div className="flex items-center gap-x-2">
-                <span className="text-sm text-gray-700">
+                <ThemeToggle />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
                   {profile.full_name || profile.email}
                 </span>
                 <Button
