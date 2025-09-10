@@ -70,6 +70,7 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
           { name: 'Master Data', href: '/dashboard/super-admin/master', icon: Settings },
           { name: 'Input Absensi', href: '/absensi', icon: UserCheck },
           { name: 'Laporan', href: '/laporan', icon: BarChart3 },
+          { name: 'Laporan DKI', href: '/laporan-dki', icon: FileText },
         ]
       case 'koordinator_desa':
         return [

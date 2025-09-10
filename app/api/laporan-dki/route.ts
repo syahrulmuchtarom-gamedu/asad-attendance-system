@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
 
     const user = JSON.parse(sessionCookie)
     
-    // Check role access - hanya viewer yang bisa akses
-    if (user.role !== 'viewer') {
+    // Check role access - viewer dan super_admin yang bisa akses
+    if (user.role !== 'viewer' && user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       total_target_putri: number
     }} = {}
     
-    data.forEach(item => {
+    data.forEach((item: any) => {
       if (!monthlyData[item.bulan]) {
         monthlyData[item.bulan] = {
           total_hadir_putra: 0,
@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
       
       monthlyData[item.bulan].total_hadir_putra += item.hadir_putra || 0
       monthlyData[item.bulan].total_hadir_putri += item.hadir_putri || 0
-      monthlyData[item.bulan].total_target_putra += item.kelompok.target_putra || 0
-      monthlyData[item.bulan].total_target_putri += item.kelompok.target_putri || 0
+      monthlyData[item.bulan].total_target_putra += item.kelompok?.target_putra || 0
+      monthlyData[item.bulan].total_target_putri += item.kelompok?.target_putri || 0
     })
     
     // Format hasil
