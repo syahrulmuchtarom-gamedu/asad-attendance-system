@@ -101,13 +101,13 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
   const navigationItems = getNavigationItems()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/30">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-background">
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-base font-bold text-gray-900">Absensi ASAD</h1>
+            <h1 className="text-base font-bold text-foreground">Absensi ASAD</h1>
             <Button
               variant="ghost"
               size="icon"

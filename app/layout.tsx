@@ -32,7 +32,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <main className="min-h-screen bg-background transition-colors duration-300">
+          <main className="min-h-screen bg-background">
             {children}
           </main>
           <ClientToaster />
