@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Card } from '@/components/ui/card'
 import { BarChart3, UserCheck, FileText } from 'lucide-react'
 import Link from 'next/link'
@@ -20,7 +19,6 @@ export default async function AstridaDashboard() {
   }
 
   return (
-    <DashboardLayout profile={user}>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Astrida</h1>
@@ -69,6 +67,5 @@ export default async function AstridaDashboard() {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
   )
 }
