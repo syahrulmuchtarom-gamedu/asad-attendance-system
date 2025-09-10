@@ -420,12 +420,12 @@ export default function AbsensiPage() {
               {dataStatus !== 'loading' && (
                 <div className="flex items-center gap-2">
                   {dataStatus === 'existing' ? (
-                    <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 rounded-full text-sm">
                       <CheckCircle className="h-4 w-4" />
                       Data Tersimpan
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Belum Ada Data
                     </div>
@@ -534,8 +534,8 @@ export default function AbsensiPage() {
               
               return (
                 <div key={kelompok.id} className={`border rounded-lg p-4 ${
-                  hasExistingData ? 'border-green-200 bg-green-50' : 'border-gray-200'
-                } ${isDataChanged ? 'border-blue-300 bg-blue-50' : ''}`}>
+                  hasExistingData ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950' : 'border-border'
+                } ${isDataChanged ? 'border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950' : ''}`}>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">
                       {kelompok.nama_kelompok}
@@ -544,13 +544,13 @@ export default function AbsensiPage() {
                       )}
                     </h3>
                     {hasExistingData && (
-                      <div className="flex items-center gap-1 text-xs text-green-600">
+                      <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                         <CheckCircle className="h-3 w-3" />
                         Tersimpan
                       </div>
                     )}
                     {isDataChanged && (
-                      <div className="flex items-center gap-1 text-xs text-blue-600">
+                      <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
                         <Edit className="h-3 w-3" />
                         Diubah
                       </div>
@@ -566,7 +566,7 @@ export default function AbsensiPage() {
                         value={absensiData[kelompok.id]?.hadir_putra ?? ''}
                         onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
                         placeholder="0"
-                        className={hasExistingData ? 'bg-white border-green-300' : ''}
+                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
                       />
                     </div>
                     <div>
@@ -578,7 +578,7 @@ export default function AbsensiPage() {
                         value={absensiData[kelompok.id]?.hadir_putri ?? ''}
                         onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
                         placeholder="0"
-                        className={hasExistingData ? 'bg-white border-green-300' : ''}
+                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
                       />
                     </div>
                   </div>
