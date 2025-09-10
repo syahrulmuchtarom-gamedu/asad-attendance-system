@@ -32,9 +32,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <main className="min-h-screen bg-background">
-            {children}
-          </main>
+          {children}
           <ClientToaster />
         </ThemeProvider>
       </body>
