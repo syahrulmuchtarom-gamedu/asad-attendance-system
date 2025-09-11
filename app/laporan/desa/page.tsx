@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { exportToPDF, exportToExcel } from '@/components/forms/export-functions'
 import { BarChart3, Download, FileText, Calendar, Users } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface LaporanItem {
   kelompok: string
@@ -22,6 +23,7 @@ export default function LaporanDesaPage() {
   const [laporanData, setLaporanData] = useState<LaporanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [namaDesa, setNamaDesa] = useState('Unknown')
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchLaporanData()
@@ -76,7 +78,11 @@ export default function LaporanDesaPage() {
   const handleExportPDF = () => {
     try {
       if (laporanData.length === 0) {
-        alert('Tidak ada data untuk diekspor')
+        toast({
+          variant: "destructive",
+          title: "Tidak Ada Data",
+          description: "Tidak ada data untuk diekspor",
+        })
         return
       }
       
@@ -96,14 +102,22 @@ export default function LaporanDesaPage() {
       
       exportToPDF(exportData, parseInt(selectedMonth), parseInt(selectedYear))
     } catch (error) {
-      alert('Gagal export PDF: ' + (error as Error).message)
+      toast({
+        variant: "destructive",
+        title: "Gagal Export",
+        description: 'Gagal export PDF: ' + (error as Error).message,
+      })
     }
   }
 
   const handleExportExcel = () => {
     try {
       if (laporanData.length === 0) {
-        alert('Tidak ada data untuk diekspor')
+        toast({
+          variant: "destructive",
+          title: "Tidak Ada Data",
+          description: "Tidak ada data untuk diekspor",
+        })
         return
       }
       
@@ -123,7 +137,11 @@ export default function LaporanDesaPage() {
       
       exportToExcel(exportData, parseInt(selectedMonth), parseInt(selectedYear))
     } catch (error) {
-      alert('Gagal export Excel: ' + (error as Error).message)
+      toast({
+        variant: "destructive",
+        title: "Gagal Export",
+        description: 'Gagal export Excel: ' + (error as Error).message,
+      })
     }
   }
 

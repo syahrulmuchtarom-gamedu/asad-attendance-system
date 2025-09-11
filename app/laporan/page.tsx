@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { exportToPDF, exportToExcel } from '@/components/forms/export-functions'
 import { BarChart3, Download, FileText, Calendar, X } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export default function LaporanPage() {
   const [selectedMonth, setSelectedMonth] = useState('12')
@@ -17,6 +18,7 @@ export default function LaporanPage() {
   const [detailData, setDetailData] = useState<any[]>([])
   const [selectedDesa, setSelectedDesa] = useState('')
   const [detailLoading, setDetailLoading] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchLaporanData()
@@ -50,7 +52,11 @@ export default function LaporanPage() {
   const handleExportPDF = () => {
     try {
       if (laporanData.length === 0) {
-        alert('Tidak ada data untuk diekspor')
+        toast({
+          variant: "destructive",
+          title: "Tidak Ada Data",
+          description: "Tidak ada data untuk diekspor",
+        })
         return
       }
       
@@ -69,14 +75,22 @@ export default function LaporanPage() {
       
       exportToPDF(exportData, parseInt(selectedMonth), parseInt(selectedYear))
     } catch (error) {
-      alert('Gagal export PDF: ' + (error as Error).message)
+      toast({
+        variant: "destructive",
+        title: "Gagal Export",
+        description: 'Gagal export PDF: ' + (error as Error).message,
+      })
     }
   }
 
   const handleExportExcel = () => {
     try {
       if (laporanData.length === 0) {
-        alert('Tidak ada data untuk diekspor')
+        toast({
+          variant: "destructive",
+          title: "Tidak Ada Data",
+          description: "Tidak ada data untuk diekspor",
+        })
         return
       }
       
@@ -95,7 +109,11 @@ export default function LaporanPage() {
       
       exportToExcel(exportData, parseInt(selectedMonth), parseInt(selectedYear))
     } catch (error) {
-      alert('Gagal export Excel: ' + (error as Error).message)
+      toast({
+        variant: "destructive",
+        title: "Gagal Export",
+        description: 'Gagal export Excel: ' + (error as Error).message,
+      })
     }
   }
 

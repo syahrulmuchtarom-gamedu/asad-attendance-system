@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users, Calendar, Save, Edit, CheckCircle, AlertCircle } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface Kelompok {
   id: number
@@ -38,6 +39,7 @@ export default function AbsensiPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showDesaList, setShowDesaList] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     setIsClient(true)
@@ -258,7 +260,10 @@ export default function AbsensiPage() {
       }
       
       console.log('✅ SUBMIT - All data saved successfully')
-      alert('Data absensi berhasil disimpan!')
+      toast({
+        title: "Berhasil",
+        description: "Data absensi berhasil disimpan!",
+      })
       
       // Refresh data setelah submit
       await fetchExistingData()
@@ -279,7 +284,11 @@ export default function AbsensiPage() {
       }
     } catch (error: any) {
       console.error('❌ SUBMIT - Error:', error)
-      alert(`Error: ${error.message}`)
+      toast({
+        variant: "destructive",
+        title: "Terjadi Kesalahan",
+        description: error.message || "Gagal menyimpan data",
+      })
     } finally {
       setLoading(false)
     }

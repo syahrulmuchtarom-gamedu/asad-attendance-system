@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface User {
   id: number
@@ -21,6 +22,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -63,15 +65,26 @@ export default function UsersPage() {
       })
 
       if (response.ok) {
-        alert(editingUser ? 'User berhasil diupdate' : 'User berhasil ditambahkan')
+        toast({
+          title: "Berhasil",
+          description: editingUser ? 'User berhasil diupdate' : 'User berhasil ditambahkan',
+        })
         resetForm()
         fetchUsers()
       } else {
         const error = await response.json()
-        alert(`Error: ${error.error}`)
+        toast({
+          variant: "destructive",
+          title: "Terjadi Kesalahan",
+          description: error.error || "Gagal menyimpan user",
+        })
       }
     } catch (error) {
-      alert('Terjadi kesalahan')
+      toast({
+        variant: "destructive",
+        title: "Terjadi Kesalahan",
+        description: "Gagal menyimpan user",
+      })
     }
   }
 
@@ -96,14 +109,25 @@ export default function UsersPage() {
       })
 
       if (response.ok) {
-        alert('User berhasil dihapus')
+        toast({
+          title: "Berhasil",
+          description: "User berhasil dihapus",
+        })
         fetchUsers()
       } else {
         const error = await response.json()
-        alert(`Error: ${error.error}`)
+        toast({
+          variant: "destructive",
+          title: "Terjadi Kesalahan",
+          description: error.error || "Gagal menghapus user",
+        })
       }
     } catch (error) {
-      alert('Terjadi kesalahan')
+      toast({
+        variant: "destructive",
+        title: "Terjadi Kesalahan",
+        description: "Gagal menghapus user",
+      })
     }
   }
 
