@@ -34,7 +34,13 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
   const fetchContacts = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/settings')
+      
+      // Try settings API first, fallback to users API
+      let response = await fetch('/api/settings')
+      if (!response.ok && response.status === 405) {
+        // Fallback: use users API to get settings
+        response = await fetch('/api/users?action=get_settings')
+      }
       
       if (!response.ok) {
         console.error('Failed to fetch contacts:', response.status)
