@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Building2, Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { Building2, Users, Plus, Edit, Trash2, Phone } from 'lucide-react'
 import { DesaForm } from '@/components/forms/desa-form'
 import { KelompokForm } from '@/components/forms/kelompok-form'
+import { ContactSettingsForm } from '@/components/forms/contact-settings-form'
 import { useToast } from '@/hooks/use-toast'
 
 interface Desa {
@@ -255,6 +256,12 @@ export default function MasterDataPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Contact Settings */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Pengaturan Kontak</h2>
+        <ContactSettingsForm />
       </div>
 
       <DesaForm
