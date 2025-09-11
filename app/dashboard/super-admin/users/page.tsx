@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface User {
@@ -98,6 +98,47 @@ export default function UsersPage() {
       is_active: user.is_active
     })
     setShowForm(true)
+  }
+
+  const handleResetPassword = async (user: User) => {
+    if (!confirm(`Reset password untuk ${user.username}?\nPassword akan direset ke: ${user.username}123`)) return
+
+    try {
+      const response = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          username: user.username,
+          full_name: user.full_name,
+          role: user.role,
+          is_active: user.is_active,
+          resetPassword: true
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: "Berhasil",
+          description: result.message,
+        })
+        fetchUsers()
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Terjadi Kesalahan",
+          description: result.error || "Gagal reset password",
+        })
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Terjadi Kesalahan",
+        description: "Gagal reset password",
+      })
+    }
   }
 
   const handleDelete = async (userId: number) => {
@@ -267,19 +308,30 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td className="p-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => handleEdit(user)}
+                          title="Edit User"
                         >
                           <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleResetPassword(user)}
+                          title="Reset Password"
+                          className="text-orange-600"
+                        >
+                          <RotateCcw className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           className="text-red-600"
                           onClick={() => handleDelete(user.id)}
+                          title="Hapus User"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

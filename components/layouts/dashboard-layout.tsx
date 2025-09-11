@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -15,9 +15,11 @@ import {
   BarChart3, 
   Settings, 
   LogOut,
-  UserCheck
+  UserCheck,
+  Lock
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { ChangePasswordForm } from '@/components/forms/change-password-form'
 import { Profile } from '@/types'
 import { ROLE_LABELS } from '@/lib/constants'
 
@@ -28,6 +30,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClient()
@@ -57,7 +60,7 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
     }
   }
 
-  const getNavigationItems = () => {
+  const navigationItems = useMemo(() => {
     const baseItems = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
     ]
@@ -98,9 +101,7 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
       default:
         return baseItems
     }
-  }
-
-  const navigationItems = getNavigationItems()
+  }, [profile.role])
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,23 +157,35 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
             ))}
           </nav>
           <div className="flex-shrink-0 p-4 border-t border-border">
-            <div className="flex items-center">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {profile.full_name || profile.email}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {ROLE_LABELS[profile.role]}
-                </p>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {profile.full_name || profile.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {ROLE_LABELS[profile.role]}
+                  </p>
+                </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                className="ml-2"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowChangePassword(true)}
+                  className="flex-1 justify-start"
+                >
+                  <Lock className="h-3 w-3 mr-2" />
+                  <span className="text-xs">Ubah Password</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -197,6 +210,15 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border" />
               <div className="flex items-center gap-x-2">
                 <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowChangePassword(true)}
+                  className="hidden sm:flex"
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Ubah Password
+                </Button>
                 <span className="text-sm text-muted-foreground">
                   {profile.full_name || profile.email}
                 </span>
@@ -220,6 +242,11 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
           </div>
         </main>
       </div>
+      
+      <ChangePasswordForm 
+        isOpen={showChangePassword} 
+        onClose={() => setShowChangePassword(false)} 
+      />
     </div>
   )
 }

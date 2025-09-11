@@ -12,10 +12,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
+import { ForgotPasswordModal } from '@/components/forms/forgot-password-modal'
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -36,18 +38,13 @@ export function LoginForm() {
         password: data.password,
       }
       
-      console.log('Login attempt:', loginData)
-
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData),
       })
       
-      console.log('Response status:', response.status)
-      
       const result = await response.json()
-      console.log('Response data:', result)
 
       if (!response.ok) {
         toast({
@@ -60,7 +57,6 @@ export function LoginForm() {
 
       // SAVE TO LOCALSTORAGE AS BACKUP
       localStorage.setItem('user_session', JSON.stringify(result.user))
-      console.log('✅ User data saved to localStorage:', result.user)
       
       toast({
         title: "Login Berhasil",
@@ -143,9 +139,25 @@ export function LoginForm() {
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? 'Memproses...' : 'Login'}
           </Button>
+          
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-primary hover:underline"
+              disabled={isLoading}
+            >
+              Lupa Password?
+            </button>
+          </div>
         </form>
       </CardContent>
     </Card>
+    
+    <ForgotPasswordModal 
+      isOpen={showForgotPassword} 
+      onClose={() => setShowForgotPassword(false)} 
+    />
     </div>
   )
 }

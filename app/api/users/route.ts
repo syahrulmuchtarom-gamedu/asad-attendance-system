@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = createAdminClient()
-    const { id, username, password, full_name, role, desa_id, is_active } = await request.json()
+    const { id, username, password, full_name, role, desa_id, is_active, resetPassword } = await request.json()
 
     const updateData: any = {
       username,
@@ -66,7 +66,10 @@ export async function PUT(request: NextRequest) {
       is_active
     }
 
-    if (password) {
+    // Reset password to default (username + 123)
+    if (resetPassword) {
+      updateData.password = username + '123'
+    } else if (password) {
       updateData.password = password
     }
 
@@ -80,7 +83,7 @@ export async function PUT(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ 
-      message: 'User updated successfully',
+      message: resetPassword ? `Password direset ke: ${username}123` : 'User updated successfully',
       user 
     })
   } catch (error: any) {
@@ -105,18 +108,27 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cek apakah user pernah input absensi
-    const { data: absensiData } = await supabase
+    const { data: absensiData, error: absensiError } = await supabase
       .from('absensi')
       .select('id')
       .eq('input_by', id)
       .limit(1)
 
+    if (absensiError) {
+      console.error('Error checking absensi:', absensiError)
+    }
+
     if (absensiData && absensiData.length > 0) {
       // Jika user pernah input absensi, set input_by ke NULL atau user lain
-      await supabase
+      const { error: updateError } = await supabase
         .from('absensi')
         .update({ input_by: null })
         .eq('input_by', id)
+      
+      if (updateError) {
+        console.error('Error updating absensi:', updateError)
+        throw updateError
+      }
     }
 
     // Sekarang hapus user
