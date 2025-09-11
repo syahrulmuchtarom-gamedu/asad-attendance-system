@@ -1,10 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient()
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
     
+    // Handle get settings (temporary workaround)
+    if (action === 'get_settings') {
+      const { data: settings, error } = await supabase
+        .from('settings')
+        .select('key, value, description')
+        .in('key', ['admin_phone', 'admin_whatsapp'])
+      
+      if (error) {
+        // Return default values if table doesn't exist
+        return NextResponse.json({ 
+          data: [
+            { key: 'admin_phone', value: '021-1234-5678' },
+            { key: 'admin_whatsapp', value: '0812-3456-7890' }
+          ]
+        })
+      }
+      
+      return NextResponse.json({ data: settings })
+    }
+    
+    // Regular users fetch
     const { data: users, error } = await supabase
       .from('users')
       .select('*')
@@ -24,7 +47,46 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createAdminClient()
-    const { username, password, full_name, role, desa_id } = await request.json()
+    const requestData = await request.json()
+    
+    // Handle settings update (temporary workaround)
+    if (requestData.action === 'update_settings') {
+      const { admin_phone, admin_whatsapp } = requestData
+      
+      if (!admin_phone || !admin_whatsapp) {
+        return NextResponse.json({ 
+          error: 'Nomor telepon dan WhatsApp harus diisi' 
+        }, { status: 400 })
+      }
+      
+      // Update or insert settings
+      const { error: phoneError } = await supabase
+        .from('settings')
+        .upsert({ 
+          key: 'admin_phone',
+          value: admin_phone,
+          description: 'Nomor telepon admin untuk lupa password'
+        })
+      
+      const { error: whatsappError } = await supabase
+        .from('settings')
+        .upsert({ 
+          key: 'admin_whatsapp',
+          value: admin_whatsapp,
+          description: 'Nomor WhatsApp admin untuk lupa password'
+        })
+      
+      if (phoneError || whatsappError) {
+        throw phoneError || whatsappError
+      }
+      
+      return NextResponse.json({ 
+        message: 'Kontak admin berhasil diupdate'
+      })
+    }
+    
+    // Regular user creation
+    const { username, password, full_name, role, desa_id } = requestData
 
     const { data: user, error } = await supabase
       .from('users')

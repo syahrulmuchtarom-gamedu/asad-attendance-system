@@ -24,7 +24,12 @@ export function ContactSettingsForm() {
   const fetchSettings = async () => {
     try {
       setIsFetching(true)
-      const response = await fetch('/api/settings')
+      // Try settings API first, fallback to users API
+      let response = await fetch('/api/settings')
+      if (!response.ok && response.status === 405) {
+        // Fallback: use users API to get settings
+        response = await fetch('/api/users?action=get_settings')
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
@@ -89,10 +94,14 @@ export function ContactSettingsForm() {
     try {
       setIsLoading(true)
       
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
+      // Temporary: Use users API until settings API is deployed
+      const response = await fetch('/api/users', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          action: 'update_settings',
+          ...formData
+        })
       })
 
       let result
