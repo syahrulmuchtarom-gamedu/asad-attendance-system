@@ -210,15 +210,6 @@ export function DashboardLayout({ children, profile }: DashboardLayoutProps) {
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border" />
               <div className="flex items-center gap-x-2">
                 <ThemeToggle />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowChangePassword(true)}
-                  className="hidden sm:flex"
-                >
-                  <Lock className="h-4 w-4 mr-2" />
-                  Ubah Password
-                </Button>
                 <span className="text-sm text-muted-foreground">
                   {profile.full_name || profile.email}
                 </span>
