@@ -75,6 +75,9 @@ export async function PUT(request: NextRequest) {
     const data = await request.json()
     const supabase = createAdminClient()
 
+    console.log('🔍 ABSENSI API - User:', { role: user.role, username: user.username, desa_id: user.desa_id })
+    console.log('🔍 ABSENSI API - Data:', data)
+
     // Validasi: koordinator desa hanya bisa update untuk kelompok di desanya
     if (user.role === 'koordinator_desa') {
       const { data: kelompok } = await supabase
@@ -90,34 +93,43 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // Super admin dan Astrida bisa input/update semua kelompok
+    console.log('✅ ABSENSI API - User authorized for role:', user.role)
+
     // Use UPSERT (insert or update)
+    const upsertData = {
+      kelompok_id: data.kelompok_id,
+      bulan: data.bulan,
+      tahun: data.tahun,
+      hadir_putra: data.hadir_putra || 0,
+      hadir_putri: data.hadir_putri || 0,
+      input_by: user.id,
+      updated_at: new Date().toISOString()
+    }
+
+    console.log('🔍 ABSENSI API - Upsert data:', upsertData)
+
     const { data: upsertedAbsensi, error: upsertError } = await supabase
       .from('absensi')
-      .upsert({
-        kelompok_id: data.kelompok_id,
-        bulan: data.bulan,
-        tahun: data.tahun,
-        hadir_putra: data.hadir_putra,
-        hadir_putri: data.hadir_putri,
-        input_by: user.id,
-        updated_at: new Date().toISOString()
-      }, {
+      .upsert(upsertData, {
         onConflict: 'kelompok_id,bulan,tahun'
       })
       .select()
       .single()
 
     if (upsertError) {
-      console.error('Upsert absensi error:', upsertError)
+      console.error('❌ ABSENSI API - Upsert error:', upsertError)
       throw upsertError
     }
+
+    console.log('✅ ABSENSI API - Success:', upsertedAbsensi)
 
     return NextResponse.json({ 
       message: 'Data absensi berhasil disimpan',
       data: upsertedAbsensi 
     })
   } catch (error) {
-    console.error('PUT API Error:', error)
+    console.error('❌ ABSENSI API - PUT Error:', error)
     return NextResponse.json({ 
       error: 'Gagal mengupdate data' 
     }, { status: 500 })

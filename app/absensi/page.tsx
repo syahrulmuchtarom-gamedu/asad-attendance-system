@@ -129,24 +129,34 @@ export default function AbsensiPage() {
       if (desaName) {
         url += `?desa=${encodeURIComponent(desaName)}`
       }
+      console.log('🔍 KELOMPOK - Fetching from:', url, 'for role:', userRole)
+      
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ KELOMPOK - Received data count:', data.length)
         setKelompokList(data)
+      } else {
+        console.error('❌ KELOMPOK - Error response:', response.status)
       }
     } catch (error) {
-      console.error('Error fetching kelompok:', error)
+      console.error('❌ KELOMPOK - Fetch error:', error)
     }
   }
 
   const fetchExistingData = async () => {
     try {
       setDataStatus('loading')
+      console.log('🔍 FETCH - Getting existing data for:', { bulan: selectedMonth, tahun: selectedYear, userRole })
+      
       const response = await fetch(`/api/absensi?bulan=${selectedMonth}&tahun=${selectedYear}`)
       const result = await response.json()
       
+      console.log('📥 FETCH - Response:', response.status, result)
+      
       if (response.ok && result.data && result.data.length > 0) {
         // Ada data existing - mode edit
+        console.log('✅ FETCH - Found existing data, count:', result.data.length)
         const existingMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
         const inputMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
         
@@ -167,13 +177,14 @@ export default function AbsensiPage() {
         setDataStatus('existing')
       } else {
         // Tidak ada data - mode input baru
+        console.log('ℹ️ FETCH - No existing data found, setting new mode')
         setExistingData({})
         setAbsensiData({})
         setIsEditMode(false)
         setDataStatus('new')
       }
     } catch (error) {
-      console.error('Error fetching existing data:', error)
+      console.error('❌ FETCH - Error fetching existing data:', error)
       setDataStatus('new')
     }
   }
@@ -212,35 +223,48 @@ export default function AbsensiPage() {
     try {
       setLoading(true)
       
+      console.log('🚀 SUBMIT - User Role:', userRole)
+      console.log('🚀 SUBMIT - Kelompok List:', kelompokList.length)
+      console.log('🚀 SUBMIT - Absensi Data:', absensiData)
+      
       // Selalu gunakan PUT method untuk UPSERT functionality
       for (const kelompok of kelompokList) {
         const data = absensiData[kelompok.id]
         if (data !== undefined && (data.hadir_putra >= 0 || data.hadir_putri >= 0)) {
+          const submitData = {
+            kelompok_id: kelompok.id,
+            bulan: selectedMonth,
+            tahun: selectedYear,
+            hadir_putra: data.hadir_putra || 0,
+            hadir_putri: data.hadir_putri || 0
+          }
+          
+          console.log('📤 SUBMIT - Sending data for kelompok:', kelompok.nama_kelompok, submitData)
+          
           const response = await fetch('/api/absensi', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              kelompok_id: kelompok.id,
-              bulan: selectedMonth,
-              tahun: selectedYear,
-              hadir_putra: data.hadir_putra || 0,
-              hadir_putri: data.hadir_putri || 0
-            })
+            body: JSON.stringify(submitData)
           })
 
+          const result = await response.json()
+          console.log('📥 SUBMIT - Response:', response.status, result)
+
           if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error)
+            console.error('❌ SUBMIT - Error for kelompok:', kelompok.nama_kelompok, result)
+            throw new Error(result.error || 'Gagal menyimpan data')
           }
         }
       }
+      
+      console.log('✅ SUBMIT - All data saved successfully')
       alert('Data absensi berhasil disimpan!')
       
       // Refresh data setelah submit
       await fetchExistingData()
       
       // Jika bukan super admin, pindah ke bulan saat ini setelah submit
-      if (userRole !== 'super_admin') {
+      if (userRole !== 'super_admin' && userRole !== 'astrida') {
         const currentMonth = new Date().getMonth() + 1
         const currentYear = new Date().getFullYear()
         setSelectedMonth(currentMonth)
@@ -254,6 +278,7 @@ export default function AbsensiPage() {
         }, 1000)
       }
     } catch (error: any) {
+      console.error('❌ SUBMIT - Error:', error)
       alert(`Error: ${error.message}`)
     } finally {
       setLoading(false)
