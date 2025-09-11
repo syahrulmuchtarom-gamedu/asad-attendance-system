@@ -23,18 +23,20 @@ export async function GET(request: NextRequest) {
 
     const supabase = createAdminClient()
     
-    // Query agregasi total Jakarta per bulan
+    // Get total target dari SEMUA kelompok (tidak tergantung ada absensi atau tidak)
+    const { data: allKelompok, error: kelompokError } = await supabase
+      .from('kelompok')
+      .select('target_putra, target_putri')
+    
+    if (kelompokError) throw kelompokError
+    
+    const totalTargetPutra = allKelompok.reduce((sum, k) => sum + (k.target_putra || 0), 0)
+    const totalTargetPutri = allKelompok.reduce((sum, k) => sum + (k.target_putri || 0), 0)
+    
+    // Query data absensi per bulan
     const { data, error } = await supabase
       .from('absensi')
-      .select(`
-        bulan,
-        hadir_putra,
-        hadir_putri,
-        kelompok!inner(
-          target_putra,
-          target_putri
-        )
-      `)
+      .select('bulan, hadir_putra, hadir_putri')
       .eq('tahun', tahun)
     
     if (error) throw error
@@ -42,25 +44,19 @@ export async function GET(request: NextRequest) {
     // Agregasi manual per bulan
     const monthlyData: { [key: number]: { 
       total_hadir_putra: number, 
-      total_hadir_putri: number,
-      total_target_putra: number,
-      total_target_putri: number
+      total_hadir_putri: number
     }} = {}
     
     data.forEach((item: any) => {
       if (!monthlyData[item.bulan]) {
         monthlyData[item.bulan] = {
           total_hadir_putra: 0,
-          total_hadir_putri: 0,
-          total_target_putra: 0,
-          total_target_putri: 0
+          total_hadir_putri: 0
         }
       }
       
       monthlyData[item.bulan].total_hadir_putra += item.hadir_putra || 0
       monthlyData[item.bulan].total_hadir_putri += item.hadir_putri || 0
-      monthlyData[item.bulan].total_target_putra += item.kelompok?.target_putra || 0
-      monthlyData[item.bulan].total_target_putri += item.kelompok?.target_putri || 0
     })
     
     // Format hasil
@@ -73,36 +69,26 @@ export async function GET(request: NextRequest) {
     for (let bulan = 1; bulan <= 12; bulan++) {
       const monthData = monthlyData[bulan]
       
-      if (monthData) {
-        const persentase_putra = monthData.total_target_putra > 0 
-          ? (monthData.total_hadir_putra / monthData.total_target_putra) * 100 
-          : 0
-        const persentase_putri = monthData.total_target_putri > 0 
-          ? (monthData.total_hadir_putri / monthData.total_target_putri) * 100 
-          : 0
-          
-        result.push({
-          bulan,
-          nama_bulan: monthNames[bulan - 1],
-          persentase_putra: Math.round(persentase_putra * 10) / 10,
-          persentase_putri: Math.round(persentase_putri * 10) / 10,
-          total_hadir_putra: monthData.total_hadir_putra,
-          total_hadir_putri: monthData.total_hadir_putri,
-          total_target_putra: monthData.total_target_putra,
-          total_target_putri: monthData.total_target_putri
-        })
-      } else {
-        result.push({
-          bulan,
-          nama_bulan: monthNames[bulan - 1],
-          persentase_putra: 0,
-          persentase_putri: 0,
-          total_hadir_putra: 0,
-          total_hadir_putri: 0,
-          total_target_putra: 0,
-          total_target_putri: 0
-        })
-      }
+      const hadirPutra = monthData?.total_hadir_putra || 0
+      const hadirPutri = monthData?.total_hadir_putri || 0
+      
+      const persentase_putra = totalTargetPutra > 0 
+        ? (hadirPutra / totalTargetPutra) * 100 
+        : 0
+      const persentase_putri = totalTargetPutri > 0 
+        ? (hadirPutri / totalTargetPutri) * 100 
+        : 0
+        
+      result.push({
+        bulan,
+        nama_bulan: monthNames[bulan - 1],
+        persentase_putra: Math.round(persentase_putra * 10) / 10,
+        persentase_putri: Math.round(persentase_putri * 10) / 10,
+        total_hadir_putra: hadirPutra,
+        total_hadir_putri: hadirPutri,
+        total_target_putra: totalTargetPutra,
+        total_target_putri: totalTargetPutri
+      })
     }
     
     return NextResponse.json({ data: result })
