@@ -59,13 +59,15 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
       
-      // Update or insert settings
+      // Update or insert settings with proper conflict resolution
       const { error: phoneError } = await supabase
         .from('settings')
         .upsert({ 
           key: 'admin_phone',
           value: admin_phone,
           description: 'Nomor telepon admin untuk lupa password'
+        }, {
+          onConflict: 'key'
         })
       
       const { error: whatsappError } = await supabase
@@ -74,6 +76,8 @@ export async function POST(request: NextRequest) {
           key: 'admin_whatsapp',
           value: admin_whatsapp,
           description: 'Nomor WhatsApp admin untuk lupa password'
+        }, {
+          onConflict: 'key'
         })
       
       if (phoneError || whatsappError) {
