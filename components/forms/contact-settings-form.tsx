@@ -95,10 +95,16 @@ export function ContactSettingsForm() {
         body: JSON.stringify(formData)
       })
 
-      const result = await response.json()
+      let result
+      try {
+        result = await response.json()
+      } catch (jsonError) {
+        console.error('JSON parse error:', jsonError)
+        throw new Error(`Server error: ${response.status} ${response.statusText}`)
+      }
 
       if (!response.ok) {
-        throw new Error(result.error)
+        throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`)
       }
 
       toast({

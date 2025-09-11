@@ -78,10 +78,18 @@ export async function PUT(request: NextRequest) {
       message: 'Kontak admin berhasil diupdate' 
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Settings PUT error:', error)
+    
+    // Check if it's a database table not found error
+    if (error.message?.includes('relation "settings" does not exist')) {
+      return NextResponse.json({ 
+        error: 'Tabel settings belum dibuat. Jalankan SQL schema terlebih dahulu.' 
+      }, { status: 500 })
+    }
+    
     return NextResponse.json({ 
-      error: 'Gagal mengupdate kontak admin' 
+      error: error.message || 'Gagal mengupdate kontak admin' 
     }, { status: 500 })
   }
 }
