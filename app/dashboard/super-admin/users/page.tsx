@@ -279,7 +279,59 @@ export default function UsersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Card Layout */}
+          <div className="block md:hidden space-y-4">
+            {users.map((user) => (
+              <div key={user.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-lg">{user.username}</h3>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.is_active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">{user.full_name}</p>
+                  <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(user)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleResetPassword(user)}
+                    className="flex-1 text-orange-600"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-red-600"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Hapus
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
