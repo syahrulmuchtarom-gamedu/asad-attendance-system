@@ -4,8 +4,6 @@ import { Card } from '@/components/ui/card'
 import { BarChart3, UserCheck, FileText } from 'lucide-react'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
 export default async function AstridaDashboard() {
   const cookieStore = cookies()
   const sessionCookie = cookieStore.get('user_session')?.value

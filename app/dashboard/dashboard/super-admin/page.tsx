@@ -3,8 +3,6 @@ import { cookies } from 'next/headers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Target, TrendingUp } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
-
 export default async function SuperAdminDashboard() {
   try {
     const cookieStore = cookies()
