@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -20,7 +21,8 @@ interface User {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const { toast } = useToast()
   const [formData, setFormData] = useState({
@@ -97,7 +99,7 @@ export default function UsersPage() {
       role: user.role,
       is_active: user.is_active
     })
-    setShowForm(true)
+    setShowEditModal(true)
   }
 
   const handleResetPassword = async (user: User) => {
@@ -173,7 +175,8 @@ export default function UsersPage() {
   }
 
   const resetForm = () => {
-    setShowForm(false)
+    setShowAddForm(false)
+    setShowEditModal(false)
     setEditingUser(null)
     setFormData({ username: '', password: '', full_name: '', role: 'viewer', is_active: true })
   }
@@ -189,16 +192,16 @@ export default function UsersPage() {
             Manajemen user dan hak akses sistem
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
+        <Button onClick={() => setShowAddForm(!showAddForm)}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah User
         </Button>
       </div>
 
-      {showForm && (
+      {showAddForm && (
         <Card>
           <CardHeader>
-            <CardTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</CardTitle>
+            <CardTitle>Tambah User Baru</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -212,15 +215,13 @@ export default function UsersPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="password">
-                  Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
-                </Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  required={!editingUser}
+                  required
                 />
               </div>
               <div>
@@ -247,21 +248,8 @@ export default function UsersPage() {
                   <option value="astrida">Astrida</option>
                 </select>
               </div>
-              {editingUser && (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  />
-                  <Label htmlFor="is_active">User Aktif</Label>
-                </div>
-              )}
               <div className="flex gap-2">
-                <Button type="submit">
-                  {editingUser ? 'Update' : 'Simpan'}
-                </Button>
+                <Button type="submit">Simpan</Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Batal
                 </Button>
@@ -270,6 +258,76 @@ export default function UsersPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit User Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="edit_username">Username</Label>
+              <Input
+                id="edit_username"
+                value={formData.username}
+                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_password">
+                Password (kosongkan jika tidak ingin mengubah)
+              </Label>
+              <Input
+                id="edit_password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_full_name">Nama Lengkap</Label>
+              <Input
+                id="edit_full_name"
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_role">Role</Label>
+              <select
+                id="edit_role"
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="w-full p-2 border rounded"
+              >
+                <option value="super_admin">Super Admin</option>
+                <option value="koordinator_desa">Koordinator Desa</option>
+                <option value="koordinator_daerah">Koordinator Daerah</option>
+                <option value="viewer">Viewer</option>
+                <option value="astrida">Astrida</option>
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="edit_is_active"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+              />
+              <Label htmlFor="edit_is_active">User Aktif</Label>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={resetForm}>
+                Batal
+              </Button>
+              <Button type="submit">Update</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
