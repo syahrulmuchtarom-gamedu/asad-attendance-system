@@ -219,19 +219,23 @@ export default function AbsensiPage() {
 
   const handleInputChange = (kelompokId: number, field: string, value: string) => {
     const numValue = parseInt(value) || 0
-    setAbsensiData(prev => ({
-      ...prev,
-      [kelompokId]: {
+    setAbsensiData(prev => {
+      const existing = prev[kelompokId] || {
         hadir_putra: 0,
         hadir_putri: 0,
         hadir_praremaja_putra: 0,
         hadir_praremaja_putri: 0,
         hadir_caberawit_putra: 0,
-        hadir_caberawit_putri: 0,
-        ...prev[kelompokId],
-        [field]: numValue
+        hadir_caberawit_putri: 0
       }
-    }))
+      return {
+        ...prev,
+        [kelompokId]: {
+          ...existing,
+          [field]: numValue
+        }
+      }
+    })
   }
 
   const handleDesaClick = async (desaName: string) => {
