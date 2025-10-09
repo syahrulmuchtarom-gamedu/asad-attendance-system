@@ -14,6 +14,10 @@ interface Kelompok {
   nama_kelompok: string
   target_putra: number
   target_putri: number
+  target_praremaja_putra: number
+  target_praremaja_putri: number
+  target_caberawit_putra: number
+  target_caberawit_putri: number
   desa_name?: string
 }
 
@@ -29,8 +33,22 @@ export default function AbsensiPage() {
   const [selectedYear, setSelectedYear] = useState(2025)
   const [kelompokList, setKelompokList] = useState<Kelompok[]>([])
   const [desaList, setDesaList] = useState<Desa[]>([])
-  const [absensiData, setAbsensiData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
-  const [existingData, setExistingData] = useState<{[key: number]: {hadir_putra: number, hadir_putri: number}}>({})
+  const [absensiData, setAbsensiData] = useState<{[key: number]: {
+    hadir_putra: number
+    hadir_putri: number
+    hadir_praremaja_putra: number
+    hadir_praremaja_putri: number
+    hadir_caberawit_putra: number
+    hadir_caberawit_putri: number
+  }}>({})
+  const [existingData, setExistingData] = useState<{[key: number]: {
+    hadir_putra: number
+    hadir_putri: number
+    hadir_praremaja_putra: number
+    hadir_praremaja_putri: number
+    hadir_caberawit_putra: number
+    hadir_caberawit_putri: number
+  }}>({})
   const [loading, setLoading] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [dataStatus, setDataStatus] = useState<'loading' | 'new' | 'existing'>('loading')
@@ -159,17 +177,25 @@ export default function AbsensiPage() {
       if (response.ok && result.data && result.data.length > 0) {
         // Ada data existing - mode edit
         console.log('✅ FETCH - Found existing data, count:', result.data.length)
-        const existingMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
-        const inputMap: {[key: number]: {hadir_putra: number, hadir_putri: number}} = {}
+        const existingMap: {[key: number]: any} = {}
+        const inputMap: {[key: number]: any} = {}
         
         result.data.forEach((item: any) => {
           existingMap[item.kelompok_id] = {
             hadir_putra: item.hadir_putra || 0,
-            hadir_putri: item.hadir_putri || 0
+            hadir_putri: item.hadir_putri || 0,
+            hadir_praremaja_putra: item.hadir_praremaja_putra || 0,
+            hadir_praremaja_putri: item.hadir_praremaja_putri || 0,
+            hadir_caberawit_putra: item.hadir_caberawit_putra || 0,
+            hadir_caberawit_putri: item.hadir_caberawit_putri || 0
           }
           inputMap[item.kelompok_id] = {
             hadir_putra: item.hadir_putra || 0,
-            hadir_putri: item.hadir_putri || 0
+            hadir_putri: item.hadir_putri || 0,
+            hadir_praremaja_putra: item.hadir_praremaja_putra || 0,
+            hadir_praremaja_putri: item.hadir_praremaja_putri || 0,
+            hadir_caberawit_putra: item.hadir_caberawit_putra || 0,
+            hadir_caberawit_putri: item.hadir_caberawit_putri || 0
           }
         })
         
@@ -191,11 +217,17 @@ export default function AbsensiPage() {
     }
   }
 
-  const handleInputChange = (kelompokId: number, field: 'hadir_putra' | 'hadir_putri', value: string) => {
+  const handleInputChange = (kelompokId: number, field: string, value: string) => {
     const numValue = parseInt(value) || 0
     setAbsensiData(prev => ({
       ...prev,
       [kelompokId]: {
+        hadir_putra: 0,
+        hadir_putri: 0,
+        hadir_praremaja_putra: 0,
+        hadir_praremaja_putri: 0,
+        hadir_caberawit_putra: 0,
+        hadir_caberawit_putri: 0,
         ...prev[kelompokId],
         [field]: numValue
       }
@@ -232,13 +264,17 @@ export default function AbsensiPage() {
       // Selalu gunakan PUT method untuk UPSERT functionality
       for (const kelompok of kelompokList) {
         const data = absensiData[kelompok.id]
-        if (data !== undefined && (data.hadir_putra >= 0 || data.hadir_putri >= 0)) {
+        if (data !== undefined) {
           const submitData = {
             kelompok_id: kelompok.id,
             bulan: selectedMonth,
             tahun: selectedYear,
             hadir_putra: data.hadir_putra || 0,
-            hadir_putri: data.hadir_putri || 0
+            hadir_putri: data.hadir_putri || 0,
+            hadir_praremaja_putra: data.hadir_praremaja_putra || 0,
+            hadir_praremaja_putri: data.hadir_praremaja_putri || 0,
+            hadir_caberawit_putra: data.hadir_caberawit_putra || 0,
+            hadir_caberawit_putri: data.hadir_caberawit_putri || 0
           }
           
           console.log('📤 SUBMIT - Sending data for kelompok:', kelompok.nama_kelompok, submitData)
@@ -295,12 +331,18 @@ export default function AbsensiPage() {
   }
 
   const getTotalTarget = () => {
-    return kelompokList.reduce((sum, k) => sum + k.target_putra + k.target_putri, 0)
+    return kelompokList.reduce((sum, k) => 
+      sum + k.target_putra + k.target_putri + 
+      k.target_praremaja_putra + k.target_praremaja_putri + 
+      k.target_caberawit_putra + k.target_caberawit_putri, 0
+    )
   }
 
   const getTotalHadir = () => {
     return Object.values(absensiData).reduce((sum, data) => 
-      sum + (data?.hadir_putra || 0) + (data?.hadir_putri || 0), 0
+      sum + (data?.hadir_putra || 0) + (data?.hadir_putri || 0) +
+      (data?.hadir_praremaja_putra || 0) + (data?.hadir_praremaja_putri || 0) +
+      (data?.hadir_caberawit_putra || 0) + (data?.hadir_caberawit_putri || 0), 0
     )
   }
 
@@ -600,8 +642,15 @@ export default function AbsensiPage() {
               const currentData = absensiData[kelompok.id]
               const isDataChanged = hasExistingData && currentData && (
                 currentData.hadir_putra !== existingData[kelompok.id]?.hadir_putra ||
-                currentData.hadir_putri !== existingData[kelompok.id]?.hadir_putri
+                currentData.hadir_putri !== existingData[kelompok.id]?.hadir_putri ||
+                currentData.hadir_praremaja_putra !== existingData[kelompok.id]?.hadir_praremaja_putra ||
+                currentData.hadir_praremaja_putri !== existingData[kelompok.id]?.hadir_praremaja_putri ||
+                currentData.hadir_caberawit_putra !== existingData[kelompok.id]?.hadir_caberawit_putra ||
+                currentData.hadir_caberawit_putri !== existingData[kelompok.id]?.hadir_caberawit_putri
               )
+              
+              // Check if this is special category (only Dewasa)
+              const isSpecialCategory = ['SM/SC + SB', 'Astrida', 'Pengurus Daerah'].includes(kelompok.desa_name || '')
               
               return (
                 <div key={kelompok.id} className={`border rounded-lg p-4 ${
@@ -627,32 +676,102 @@ export default function AbsensiPage() {
                       </div>
                     )}
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label>Hadir Putra (Target: {kelompok.target_putra})</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max={kelompok.target_putra}
-                        value={absensiData[kelompok.id]?.hadir_putra ?? ''}
-                        onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
-                        placeholder="0"
-                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
-                      />
-                    </div>
-                    <div>
-                      <Label>Hadir Putri (Target: {kelompok.target_putri})</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max={kelompok.target_putri}
-                        value={absensiData[kelompok.id]?.hadir_putri ?? ''}
-                        onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
-                        placeholder="0"
-                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
-                      />
+                  {/* Dewasa */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm">Dewasa</h4>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label>Hadir Putra (Target: {kelompok.target_putra})</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max={kelompok.target_putra}
+                          value={absensiData[kelompok.id]?.hadir_putra ?? ''}
+                          onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
+                          placeholder="0"
+                          className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                        />
+                      </div>
+                      <div>
+                        <Label>Hadir Putri (Target: {kelompok.target_putri})</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max={kelompok.target_putri}
+                          value={absensiData[kelompok.id]?.hadir_putri ?? ''}
+                          onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
+                          placeholder="0"
+                          className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Pra Remaja + Muda/i - Only for regular desa */}
+                  {!isSpecialCategory && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">Pra Remaja + Muda/i</h4>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label>Hadir Putra (Target: {kelompok.target_praremaja_putra})</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={kelompok.target_praremaja_putra}
+                            value={absensiData[kelompok.id]?.hadir_praremaja_putra ?? ''}
+                            onChange={(e) => handleInputChange(kelompok.id, 'hadir_praremaja_putra', e.target.value)}
+                            placeholder="0"
+                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                          />
+                        </div>
+                        <div>
+                          <Label>Hadir Putri (Target: {kelompok.target_praremaja_putri})</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={kelompok.target_praremaja_putri}
+                            value={absensiData[kelompok.id]?.hadir_praremaja_putri ?? ''}
+                            onChange={(e) => handleInputChange(kelompok.id, 'hadir_praremaja_putri', e.target.value)}
+                            placeholder="0"
+                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Cabe Rawit - Only for regular desa */}
+                  {!isSpecialCategory && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">Cabe Rawit</h4>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label>Hadir Putra (Target: {kelompok.target_caberawit_putra})</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={kelompok.target_caberawit_putra}
+                            value={absensiData[kelompok.id]?.hadir_caberawit_putra ?? ''}
+                            onChange={(e) => handleInputChange(kelompok.id, 'hadir_caberawit_putra', e.target.value)}
+                            placeholder="0"
+                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                          />
+                        </div>
+                        <div>
+                          <Label>Hadir Putri (Target: {kelompok.target_caberawit_putri})</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={kelompok.target_caberawit_putri}
+                            value={absensiData[kelompok.id]?.hadir_caberawit_putri ?? ''}
+                            onChange={(e) => handleInputChange(kelompok.id, 'hadir_caberawit_putri', e.target.value)}
+                            placeholder="0"
+                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
