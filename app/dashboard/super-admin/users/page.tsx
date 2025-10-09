@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -201,6 +201,9 @@ export default function UsersPage() {
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</DialogTitle>
+            <DialogDescription>
+              {editingUser ? 'Ubah informasi user yang sudah ada' : 'Isi form untuk menambahkan user baru'}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
