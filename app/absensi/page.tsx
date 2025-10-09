@@ -394,18 +394,15 @@ export default function AbsensiPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                'Kalideres', 'Kapuk Melati', 'Jelambar', 'Cengkareng',
-                'Kebon Jahe', 'Bandara', 'Taman Kota', 'Cipondoh'
-              ].map((desaName) => (
+              {desaList.map((desa) => (
                 <Card 
-                  key={desaName} 
+                  key={desa.id} 
                   className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
-                  onClick={() => handleDesaClick(desaName)}
+                  onClick={() => handleDesaClick(desa.nama_desa)}
                 >
                   <CardContent className="p-4">
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg mb-2">{desaName}</h3>
+                      <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         Klik untuk input absensi
                       </p>
