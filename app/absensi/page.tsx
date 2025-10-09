@@ -393,26 +393,66 @@ export default function AbsensiPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {desaList.map((desa) => (
-                <Card 
-                  key={desa.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
-                  onClick={() => handleDesaClick(desa.nama_desa)}
-                >
-                  <CardContent className="p-4">
-                    <div className="text-center">
-                      <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Klik untuk input absensi
-                      </p>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Input Absensi
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            {/* Kategori Khusus - 3 cards di atas */}
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">Kategori Khusus</h3>
+              <div className="grid gap-4 md:grid-cols-3">
+                {desaList
+                  .filter(desa => ['Pengurus Daerah', 'SM/SC + SB', 'Astrida'].includes(desa.nama_desa))
+                  .sort((a, b) => {
+                    const order = ['Pengurus Daerah', 'SM/SC + SB', 'Astrida']
+                    return order.indexOf(a.nama_desa) - order.indexOf(b.nama_desa)
+                  })
+                  .map((desa) => (
+                    <Card 
+                      key={desa.id} 
+                      className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-purple-300 bg-purple-50 dark:bg-purple-950"
+                      onClick={() => handleDesaClick(desa.nama_desa)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Klik untuk input absensi
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full">
+                            Input Absensi
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                }
+              </div>
+            </div>
+
+            {/* Desa Regular - 8 cards di bawah */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">Desa</h3>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {desaList
+                  .filter(desa => !['Pengurus Daerah', 'SM/SC + SB', 'Astrida'].includes(desa.nama_desa))
+                  .map((desa) => (
+                    <Card 
+                      key={desa.id} 
+                      className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
+                      onClick={() => handleDesaClick(desa.nama_desa)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Klik untuk input absensi
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full">
+                            Input Absensi
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                }
+              </div>
             </div>
           </CardContent>
         </Card>
