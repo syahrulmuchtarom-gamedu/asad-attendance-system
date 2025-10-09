@@ -1,41 +1,40 @@
-import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { ClientToaster } from '@/components/client-toaster'
-import { ThemeProvider } from '@/components/theme-provider'
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Absensi Penderesan ASAD',
-  description: 'Absensi Penderesan ASAD',
-  keywords: 'absensi, ASAD, penderesan, kelompok',
-  authors: [{ name: 'ASAD Development Team' }],
-}
-
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-}
-
-export default function RootLayout({
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <html lang="id" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          {children}
-          <ClientToaster />
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+  try {
+    const cookieStore = cookies()
+    const sessionCookie = cookieStore.get('user_session')?.value
+    
+    if (!sessionCookie) {
+      redirect('/login')
+    }
+
+    const user = JSON.parse(sessionCookie)
+    
+    // Convert user to profile format
+    const profile = {
+      id: user.id.toString(),
+      email: user.username + '@asad.com',
+      full_name: user.full_name,
+      role: user.role,
+      desa_id: user.desa_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    return (
+      <DashboardLayout profile={profile}>
+        {children}
+      </DashboardLayout>
+    )
+  } catch (error) {
+    console.error('Dashboard layout error:', error)
+    redirect('/login')
+  }
 }
