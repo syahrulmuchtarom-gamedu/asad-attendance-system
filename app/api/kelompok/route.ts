@@ -94,15 +94,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
+    const { 
+      nama_kelompok, 
+      desa_id, 
+      target_putra, 
+      target_putri,
+      target_praremaja_putra,
+      target_praremaja_putri,
+      target_caberawit_putra,
+      target_caberawit_putri
+    } = await request.json()
 
-    if (!nama_kelompok || !desa_id || !target_putra || !target_putri) {
-      return NextResponse.json({ error: 'All fields required' }, { status: 400 })
+    if (!nama_kelompok || !desa_id) {
+      return NextResponse.json({ error: 'Nama kelompok dan desa required' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('kelompok')
-      .insert([{ nama_kelompok, desa_id, target_putra, target_putri }])
+      .insert([{ 
+        nama_kelompok, 
+        desa_id, 
+        target_putra: target_putra || 25, 
+        target_putri: target_putri || 25,
+        target_praremaja_putra: target_praremaja_putra || 25,
+        target_praremaja_putri: target_praremaja_putri || 25,
+        target_caberawit_putra: target_caberawit_putra || 25,
+        target_caberawit_putri: target_caberawit_putri || 25
+      }])
       .select()
       .single()
 
@@ -140,21 +158,35 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { id, nama_kelompok, desa_id, target_putra, target_putri } = await request.json()
+    const { 
+      id, 
+      nama_kelompok, 
+      desa_id, 
+      target_putra, 
+      target_putri,
+      target_praremaja_putra,
+      target_praremaja_putri,
+      target_caberawit_putra,
+      target_caberawit_putri
+    } = await request.json()
 
-    if (!id || !nama_kelompok || !desa_id || target_putra === undefined || target_putri === undefined) {
-      return NextResponse.json({ error: 'All fields required' }, { status: 400 })
+    if (!id || !nama_kelompok || !desa_id) {
+      return NextResponse.json({ error: 'ID, nama kelompok, dan desa required' }, { status: 400 })
     }
 
-    console.log('Updating kelompok:', { id, nama_kelompok, desa_id, target_putra, target_putri })
+    console.log('Updating kelompok:', { id, nama_kelompok, desa_id })
 
     const { data, error } = await supabase
       .from('kelompok')
       .update({ 
         nama_kelompok, 
         desa_id, 
-        target_putra, 
-        target_putri,
+        target_putra: target_putra || 25, 
+        target_putri: target_putri || 25,
+        target_praremaja_putra: target_praremaja_putra || 25,
+        target_praremaja_putri: target_praremaja_putri || 25,
+        target_caberawit_putra: target_caberawit_putra || 25,
+        target_caberawit_putri: target_caberawit_putri || 25,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)

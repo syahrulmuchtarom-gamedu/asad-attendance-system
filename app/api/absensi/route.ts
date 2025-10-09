@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
           desa_id,
           target_putra,
           target_putri,
+          target_praremaja_putra,
+          target_praremaja_putri,
+          target_caberawit_putra,
+          target_caberawit_putri,
           desa!inner(
             id,
             nama_desa
@@ -99,6 +103,10 @@ export async function PUT(request: NextRequest) {
         tahun: data.tahun,
         hadir_putra: data.hadir_putra || 0,
         hadir_putri: data.hadir_putri || 0,
+        hadir_praremaja_putra: data.hadir_praremaja_putra || 0,
+        hadir_praremaja_putri: data.hadir_praremaja_putri || 0,
+        hadir_caberawit_putra: data.hadir_caberawit_putra || 0,
+        hadir_caberawit_putri: data.hadir_caberawit_putri || 0,
         input_by: user.id,
         updated_at: new Date().toISOString()
       }, {
