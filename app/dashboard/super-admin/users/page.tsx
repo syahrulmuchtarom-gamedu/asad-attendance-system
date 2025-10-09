@@ -271,7 +271,8 @@ export default function UsersPage() {
         </Card>
       )}
 
-      <Card>
+      {/* Desktop Table View */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -292,17 +293,19 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <tr key={user.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="p-3 font-medium">{user.username}</td>
                     <td className="p-3">{user.full_name}</td>
                     <td className="p-3">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                         {user.role}
                       </span>
                     </td>
                     <td className="p-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        user.is_active 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       }`}>
                         {user.is_active ? 'Aktif' : 'Nonaktif'}
                       </span>
@@ -322,14 +325,14 @@ export default function UsersPage() {
                           size="sm"
                           onClick={() => handleResetPassword(user)}
                           title="Reset Password"
-                          className="text-orange-600"
+                          className="text-orange-600 dark:text-orange-400"
                         >
                           <RotateCcw className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-red-600"
+                          className="text-red-600 dark:text-red-400"
                           onClick={() => handleDelete(user.id)}
                           title="Hapus User"
                         >
@@ -344,6 +347,69 @@ export default function UsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <Users className="h-5 w-5" />
+          <h2 className="text-lg font-semibold">Daftar User ({users.length})</h2>
+        </div>
+        {users.map((user) => (
+          <Card key={user.id}>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold text-base">{user.username}</div>
+                    <div className="text-sm text-muted-foreground">{user.full_name}</div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                    user.is_active 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    {user.is_active ? '🟢 Aktif' : '🔴 Nonaktif'}
+                  </span>
+                </div>
+                <div>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(user)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleResetPassword(user)}
+                    className="flex-1 text-orange-600 dark:text-orange-400"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-red-600 dark:text-red-400"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Hapus
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
