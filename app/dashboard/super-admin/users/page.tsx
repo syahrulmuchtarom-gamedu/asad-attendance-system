@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -195,81 +196,80 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  required
+      {/* Modal Form */}
+      <Dialog open={showForm} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">
+                Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required={!editingUser}
+              />
+            </div>
+            <div>
+              <Label htmlFor="full_name">Nama Lengkap</Label>
+              <Input
+                id="full_name"
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="w-full p-2 border rounded bg-background"
+              >
+                <option value="super_admin">Super Admin</option>
+                <option value="koordinator_desa">Koordinator Desa</option>
+                <option value="koordinator_daerah">Koordinator Daerah</option>
+                <option value="viewer">Viewer</option>
+                <option value="astrida">Astrida</option>
+              </select>
+            </div>
+            {editingUser && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={formData.is_active}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
+                <Label htmlFor="is_active">User Aktif</Label>
               </div>
-              <div>
-                <Label htmlFor="password">
-                  Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  required={!editingUser}
-                />
-              </div>
-              <div>
-                <Label htmlFor="full_name">Nama Lengkap</Label>
-                <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <select
-                  id="role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="super_admin">Super Admin</option>
-                  <option value="koordinator_desa">Koordinator Desa</option>
-                  <option value="koordinator_daerah">Koordinator Daerah</option>
-                  <option value="viewer">Viewer</option>
-                  <option value="astrida">Astrida</option>
-                </select>
-              </div>
-              {editingUser && (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  />
-                  <Label htmlFor="is_active">User Aktif</Label>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button type="submit">
-                  {editingUser ? 'Update' : 'Simpan'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Batal
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            )}
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" className="flex-1">
+                {editingUser ? 'Update' : 'Simpan'}
+              </Button>
+              <Button type="button" variant="outline" onClick={resetForm} className="flex-1">
+                Batal
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Desktop Table View */}
       <Card className="hidden md:block">
