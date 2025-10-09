@@ -42,11 +42,6 @@ export async function middleware(request: NextRequest) {
       const pathname = request.nextUrl.pathname
       const dashboardUrl = new URL('/dashboard', request.url)
       
-      // Skip redirect if user is at base /dashboard (let page.tsx handle it)
-      if (pathname === '/dashboard') {
-        return response
-      }
-      
       if (pathname.startsWith('/dashboard/super-admin') && user.role !== 'super_admin') {
         return NextResponse.redirect(dashboardUrl)
       }
