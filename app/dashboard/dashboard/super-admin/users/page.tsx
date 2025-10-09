@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -195,83 +196,83 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  required
+      {/* Modal Form */}
+      <Dialog open={showForm} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? 'Edit User' : 'Tambah User Baru'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">
+                Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required={!editingUser}
+              />
+            </div>
+            <div>
+              <Label htmlFor="full_name">Nama Lengkap</Label>
+              <Input
+                id="full_name"
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="w-full p-2 border rounded bg-background"
+              >
+                <option value="super_admin">Super Admin</option>
+                <option value="koordinator_desa">Koordinator Desa</option>
+                <option value="koordinator_daerah">Koordinator Daerah</option>
+                <option value="viewer">Viewer</option>
+                <option value="astrida">Astrida</option>
+              </select>
+            </div>
+            {editingUser && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={formData.is_active}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                 />
+                <Label htmlFor="is_active">User Aktif</Label>
               </div>
-              <div>
-                <Label htmlFor="password">
-                  Password {editingUser && '(kosongkan jika tidak ingin mengubah)'}
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  required={!editingUser}
-                />
-              </div>
-              <div>
-                <Label htmlFor="full_name">Nama Lengkap</Label>
-                <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <select
-                  id="role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="super_admin">Super Admin</option>
-                  <option value="koordinator_desa">Koordinator Desa</option>
-                  <option value="koordinator_daerah">Koordinator Daerah</option>
-                  <option value="viewer">Viewer</option>
-                  <option value="astrida">Astrida</option>
-                </select>
-              </div>
-              {editingUser && (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  />
-                  <Label htmlFor="is_active">User Aktif</Label>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button type="submit">
-                  {editingUser ? 'Update' : 'Simpan'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Batal
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            )}
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" className="flex-1">
+                {editingUser ? 'Update' : 'Simpan'}
+              </Button>
+              <Button type="button" variant="outline" onClick={resetForm} className="flex-1">
+                Batal
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      <Card>
+      {/* Desktop Table View */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -292,17 +293,19 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <tr key={user.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="p-3 font-medium">{user.username}</td>
                     <td className="p-3">{user.full_name}</td>
                     <td className="p-3">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                         {user.role}
                       </span>
                     </td>
                     <td className="p-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        user.is_active 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       }`}>
                         {user.is_active ? 'Aktif' : 'Nonaktif'}
                       </span>
@@ -322,14 +325,14 @@ export default function UsersPage() {
                           size="sm"
                           onClick={() => handleResetPassword(user)}
                           title="Reset Password"
-                          className="text-orange-600"
+                          className="text-orange-600 dark:text-orange-400"
                         >
                           <RotateCcw className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-red-600"
+                          className="text-red-600 dark:text-red-400"
                           onClick={() => handleDelete(user.id)}
                           title="Hapus User"
                         >
@@ -344,6 +347,69 @@ export default function UsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        <div className="flex items-center gap-2 px-1">
+          <Users className="h-5 w-5" />
+          <h2 className="text-lg font-semibold">Daftar User ({users.length})</h2>
+        </div>
+        {users.map((user) => (
+          <Card key={user.id}>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold text-base">{user.username}</div>
+                    <div className="text-sm text-muted-foreground">{user.full_name}</div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                    user.is_active 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    {user.is_active ? '🟢 Aktif' : '🔴 Nonaktif'}
+                  </span>
+                </div>
+                <div>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(user)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleResetPassword(user)}
+                    className="flex-1 text-orange-600 dark:text-orange-400"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-red-600 dark:text-red-400"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Hapus
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
