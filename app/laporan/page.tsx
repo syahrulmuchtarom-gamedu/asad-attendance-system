@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { exportToPDF, exportToExcel } from '@/components/forms/export-functions'
-import { BarChart3, Download, FileText, Calendar, X } from 'lucide-react'
+import { BarChart3, Download, FileText, Calendar, X, Printer } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export default function LaporanPage() {
@@ -141,6 +141,45 @@ export default function LaporanPage() {
     } finally {
       setDetailLoading(false)
     }
+  }
+
+  const handlePrintDetail = () => {
+    const printContent = document.getElementById('detail-table-print')
+    if (!printContent) return
+    
+    const printWindow = window.open('', '', 'width=800,height=600')
+    if (!printWindow) return
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Detail Desa ${selectedDesa} - ${selectedMonth}/${selectedYear}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { text-align: center; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+            th { background-color: #f0f0f0; font-weight: bold; }
+            td:first-child { text-align: left; }
+            tfoot { font-weight: bold; background-color: #f0f0f0; }
+            @media print {
+              body { padding: 10px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Detail Desa ${selectedDesa} - ${selectedMonth}/${selectedYear}</h2>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `)
+    
+    printWindow.document.close()
+    printWindow.focus()
+    setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 250)
   }
 
   if (loading) {
@@ -374,7 +413,13 @@ export default function LaporanPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="overflow-x-auto">
+              <div className="flex justify-end mb-2">
+                <Button onClick={handlePrintDetail} size="sm">
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print PDF
+                </Button>
+              </div>
+              <div className="overflow-x-auto" id="detail-table-print">
                 <table className="w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-muted/30">
