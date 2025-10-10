@@ -77,11 +77,30 @@ export async function GET(request: NextRequest) {
     
     const aggregatedData = Array.from(desaMap.values())
     
-    // Custom sorting: Kalideres pertama, sisanya alfabetis
+    // Custom sorting dengan urutan spesifik
+    const desaOrder = [
+      'Kalideres',
+      'Bandara',
+      'Cengkareng',
+      'Cipondoh',
+      'Jelambar',
+      'Kapuk Melati',
+      'Kebon Jahe',
+      'Taman Kota',
+      'Pengurus Daerah',
+      'SM/SC + SB',
+      'Astrida'
+    ]
+    
     aggregatedData.sort((a, b) => {
-      if (a.desa === 'Kalideres') return -1
-      if (b.desa === 'Kalideres') return 1
-      return a.desa.localeCompare(b.desa)
+      const indexA = desaOrder.indexOf(a.desa)
+      const indexB = desaOrder.indexOf(b.desa)
+      
+      if (indexA === -1 && indexB === -1) return a.desa.localeCompare(b.desa)
+      if (indexA === -1) return 1
+      if (indexB === -1) return -1
+      
+      return indexA - indexB
     })
     
     return NextResponse.json({ data: aggregatedData })
