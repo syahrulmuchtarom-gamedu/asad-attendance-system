@@ -77,6 +77,13 @@ export async function GET(request: NextRequest) {
     
     const aggregatedData = Array.from(desaMap.values())
     
+    // Custom sorting: Kalideres pertama, sisanya alfabetis
+    aggregatedData.sort((a, b) => {
+      if (a.desa === 'Kalideres') return -1
+      if (b.desa === 'Kalideres') return 1
+      return a.desa.localeCompare(b.desa)
+    })
+    
     return NextResponse.json({ data: aggregatedData })
   } catch (error) {
     console.error('Laporan API Error:', error)
