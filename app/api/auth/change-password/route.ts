@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
 
     // Verifikasi password lama
     const { data: userData, error: userError } = await supabase
