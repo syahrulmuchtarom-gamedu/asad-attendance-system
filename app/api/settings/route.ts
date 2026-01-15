@@ -57,12 +57,13 @@ export async function PUT(request: NextRequest) {
 
     // Helper function untuk update setting
     const updateSetting = async (key: string, value: string) => {
-      const { error } = await supabase
+      const supabaseAny = supabase as any
+      const { error } = await supabaseAny
         .from('settings')
         .update({ 
           value,
           updated_at: new Date().toISOString()
-        } as any)
+        })
         .eq('key', key)
       
       if (error) throw error
