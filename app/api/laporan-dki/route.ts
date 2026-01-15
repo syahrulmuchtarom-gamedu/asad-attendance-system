@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const tahun = searchParams.get('tahun') || '2025'
 
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
     
     // Get total target dari SEMUA kelompok (tidak tergantung ada absensi atau tidak)
     const { data: allKelompok, error: kelompokError } = await supabase
