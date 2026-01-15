@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simple password check (dalam production sebaiknya pakai bcrypt)
-    if (userData.password !== oldPassword) {
+    if ((userData as any).password !== oldPassword) {
       return NextResponse.json({ error: 'Password lama tidak sesuai' }, { status: 400 })
     }
 
