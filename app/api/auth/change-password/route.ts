@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
 
     // Verifikasi password lama
     const { data: userData, error: userError } = await supabase
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simple password check (dalam production sebaiknya pakai bcrypt)
-    if ((userData as any).password !== oldPassword) {
+    if (userData.password !== oldPassword) {
       return NextResponse.json({ error: 'Password lama tidak sesuai' }, { status: 400 })
     }
 

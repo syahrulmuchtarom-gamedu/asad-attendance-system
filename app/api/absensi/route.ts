@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const bulan = searchParams.get('bulan')
     const tahun = searchParams.get('tahun')
 
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     
     let query = supabase
       .from('absensi')
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
 
     const user = JSON.parse(sessionCookie)
     const data = await request.json()
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
 
     // Validasi: koordinator desa hanya bisa update untuk kelompok di desanya
     if (user.role === 'koordinator_desa') {
@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest) {
         .eq('id', data.kelompok_id)
         .single()
       
-      if (!kelompok || (kelompok as any).desa_id !== user.desa_id) {
+      if (!kelompok || kelompok.desa_id !== user.desa_id) {
         return NextResponse.json({ 
           error: 'Anda tidak memiliki akses untuk kelompok ini' 
         }, { status: 403 })
@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest) {
         hadir_putri: data.hadir_putri || 0,
         input_by: user.id,
         updated_at: new Date().toISOString()
-      } as any, {
+      }, {
         onConflict: 'kelompok_id,bulan,tahun'
       })
       .select()

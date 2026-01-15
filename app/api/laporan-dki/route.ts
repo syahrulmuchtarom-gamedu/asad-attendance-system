@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const tahun = searchParams.get('tahun') || '2025'
 
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     
     // Get total target dari SEMUA kelompok (tidak tergantung ada absensi atau tidak)
     const { data: allKelompok, error: kelompokError } = await supabase
@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
     
     if (kelompokError) throw kelompokError
     
-    const totalTargetPutra = allKelompok.reduce((sum: number, k: any) => sum + (k.target_putra || 0), 0)
-    const totalTargetPutri = allKelompok.reduce((sum: number, k: any) => sum + (k.target_putri || 0), 0)
+    const totalTargetPutra = allKelompok.reduce((sum, k) => sum + (k.target_putra || 0), 0)
+    const totalTargetPutri = allKelompok.reduce((sum, k) => sum + (k.target_putri || 0), 0)
     
     // Query data absensi per bulan
     const { data, error } = await supabase

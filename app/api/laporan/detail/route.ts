@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
     }
 
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     
     // Alternatif: Query step by step untuk debugging
     // 1. Cari desa_id berdasarkan nama desa
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 3. Cari data absensi untuk kelompok-kelompok tersebut
-    const kelompokIds = kelompokData?.map((k: any) => k.id) || []
+    const kelompokIds = kelompokData?.map(k => k.id) || []
     
     const { data, error } = await supabase
       .from('absensi')

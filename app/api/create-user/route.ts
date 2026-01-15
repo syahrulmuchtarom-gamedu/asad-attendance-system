@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     
     console.log('Creating user suppcon in users table...')
 

@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')
     
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     const requestData = await request.json()
     
     // Handle settings update (temporary workaround)
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     const { id, username, password, full_name, role, desa_id, is_active, resetPassword } = await request.json()
 
     const updateData: any = {
@@ -162,7 +162,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
