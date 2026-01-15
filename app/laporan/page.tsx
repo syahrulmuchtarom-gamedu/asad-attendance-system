@@ -183,28 +183,33 @@ export default function LaporanPage() {
   }
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>
+    return (
+      <div className="flex flex-col justify-center items-center h-64 gap-3">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Memuat laporan...</p>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Laporan Kehadiran</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Laporan Kehadiran</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Laporan kehadiran bulanan semua desa
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleExportPDF} variant="outline">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button onClick={handleExportPDF} variant="outline" className="w-full sm:w-auto">
             <Download className="mr-2 h-4 w-4" />
             PDF
           </Button>
-          <Button onClick={handleExportExcel} variant="outline">
+          <Button onClick={handleExportExcel} variant="outline" className="w-full sm:w-auto">
             <Download className="mr-2 h-4 w-4" />
             Excel
           </Button>
-          <Button onClick={handlePrint}>
+          <Button onClick={handlePrint} className="w-full sm:w-auto">
             <FileText className="mr-2 h-4 w-4" />
             Print
           </Button>
@@ -220,11 +225,11 @@ export default function LaporanPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="space-y-2">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="space-y-2 flex-1">
               <label className="text-sm font-medium">Tahun</label>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -239,10 +244,10 @@ export default function LaporanPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <label className="text-sm font-medium">Bulan</label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -266,7 +271,7 @@ export default function LaporanPage() {
       </Card>
 
       {/* Summary */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Target</CardTitle>
@@ -324,76 +329,164 @@ export default function LaporanPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3 font-medium">Desa</th>
-                    <th className="text-center p-3 font-medium">Target</th>
-                    <th className="text-center p-3 font-medium">Hadir</th>
-                    <th className="text-center p-3 font-medium">Persentase</th>
-                    <th className="text-center p-3 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {laporanData.map((item, index) => {
-                    const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
-                    return (
-                      <tr key={index} className="border-b hover:bg-muted/50">
-                        <td className="p-3 font-medium">
-                          <button 
-                            onClick={() => handleDesaClick(item.desa)}
-                            className="text-primary hover:text-primary/80 hover:underline font-medium"
-                          >
-                            {item.desa}
-                          </button>
-                        </td>
-                        <td className="p-3 text-center">{item.target}</td>
-                        <td className="p-3 text-center">{item.hadir}</td>
-                        <td className="p-3 text-center font-bold">{persentase.toFixed(1)}%</td>
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-medium">Desa</th>
+                      <th className="text-center p-3 font-medium">Target</th>
+                      <th className="text-center p-3 font-medium">Hadir</th>
+                      <th className="text-center p-3 font-medium">Persentase</th>
+                      <th className="text-center p-3 font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {laporanData.map((item, index) => {
+                      const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
+                      return (
+                        <tr key={index} className="border-b hover:bg-muted/50">
+                          <td className="p-3 font-medium">
+                            <button 
+                              onClick={() => handleDesaClick(item.desa)}
+                              className="text-primary hover:text-primary/80 hover:underline font-medium min-h-[44px] py-2"
+                            >
+                              {item.desa}
+                            </button>
+                          </td>
+                          <td className="p-3 text-center">{item.target}</td>
+                          <td className="p-3 text-center">{item.hadir}</td>
+                          <td className="p-3 text-center font-bold">{persentase.toFixed(1)}%</td>
+                          <td className="p-3 text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              persentase >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                              persentase >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                            }`}>
+                              {persentase >= 90 ? 'Sangat Baik' :
+                               persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                  {laporanData.length > 0 && (
+                    <tfoot>
+                      <tr className="border-t-2 bg-muted/50">
+                        <td className="p-3 font-bold">TOTAL</td>
+                        <td className="p-3 text-center font-bold">{totalTarget}</td>
+                        <td className="p-3 text-center font-bold">{totalHadir}</td>
+                        <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
                         <td className="p-3 text-center">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            overallPercentage >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                            overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                          }`}>
+                            {overallPercentage >= 90 ? 'Sangat Baik' :
+                             overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                          </span>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {laporanData.map((item, index) => {
+                  const persentase = item.target > 0 ? (item.hadir / item.target) * 100 : 0
+                  return (
+                    <Card 
+                      key={index} 
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => handleDesaClick(item.desa)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3 className="font-bold text-lg">{item.desa}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                             persentase >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
                             persentase >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
                             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
                           }`}>
-                            {persentase >= 90 ? 'Sangat Baik' :
-                             persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                            <span className="hidden sm:inline">
+                              {persentase >= 90 ? 'Sangat Baik' : persentase >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                            </span>
+                            <span className="sm:hidden">
+                              {persentase >= 90 ? '✓✓' : persentase >= 80 ? '✓' : '!'}
+                            </span>
                           </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-                {laporanData.length > 0 && (
-                  <tfoot>
-                    <tr className="border-t-2 bg-muted/50">
-                      <td className="p-3 font-bold">TOTAL</td>
-                      <td className="p-3 text-center font-bold">{totalTarget}</td>
-                      <td className="p-3 text-center font-bold">{totalHadir}</td>
-                      <td className="p-3 text-center font-bold">{overallPercentage.toFixed(1)}%</td>
-                      <td className="p-3 text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          overallPercentage >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                          overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
-                          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                        }`}>
-                          {overallPercentage >= 90 ? 'Sangat Baik' :
-                           overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Target</p>
+                            <p className="text-xl font-bold">{item.target}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Hadir</p>
+                            <p className="text-xl font-bold">{item.hadir}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Persentase</span>
+                            <span className="text-2xl font-bold text-primary">{persentase.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+                
+                {/* Mobile Total Card */}
+                <Card className="bg-muted/50">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-bold text-lg">TOTAL</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        overallPercentage >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                        overallPercentage >= 80 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                      }`}>
+                        <span className="hidden sm:inline">
+                          {overallPercentage >= 90 ? 'Sangat Baik' : overallPercentage >= 80 ? 'Baik' : 'Perlu Perbaikan'}
                         </span>
-                      </td>
-                    </tr>
-                  </tfoot>
-                )}
-              </table>
-            </div>
+                        <span className="sm:hidden">
+                          {overallPercentage >= 90 ? '✓✓' : overallPercentage >= 80 ? '✓' : '!'}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">Target</p>
+                        <p className="text-xl font-bold">{totalTarget}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">Hadir</p>
+                        <p className="text-xl font-bold">{totalHadir}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Persentase</span>
+                        <span className="text-2xl font-bold text-primary">{overallPercentage.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Modal Detail Desa */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               Detail Desa {selectedDesa} - {selectedMonth}/{selectedYear}
@@ -419,8 +512,9 @@ export default function LaporanPage() {
                   Print PDF
                 </Button>
               </div>
-              <div className="overflow-x-auto" id="detail-table-print">
-                <table className="w-full border-collapse border border-gray-300">
+              <div className="overflow-x-auto relative" id="detail-table-print">
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none md:hidden z-10"></div>
+                <table className="w-full min-w-[800px] border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-muted/30">
                       <th className="border border-gray-300 px-4 py-2 text-left font-medium">Kelompok</th>
