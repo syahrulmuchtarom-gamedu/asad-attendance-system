@@ -6,11 +6,46 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-type UserRole = 'super_admin' | 'koordinator_desa' | 'koordinator_daerah' | 'viewer'
+type UserRole = 'super_admin' | 'koordinator_desa' | 'koordinator_daerah' | 'viewer' | 'astrida'
 
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: number
+          username: string
+          password: string
+          full_name: string
+          role: UserRole
+          desa_id: number | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          username: string
+          password: string
+          full_name: string
+          role: UserRole
+          desa_id?: number | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          username?: string
+          password?: string
+          full_name?: string
+          role?: UserRole
+          desa_id?: number | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       profiles: {
         Row: {
           id: string
@@ -91,7 +126,7 @@ export interface Database {
           tahun: number
           hadir_putra: number
           hadir_putri: number
-          input_by: string
+          input_by: number
           created_at: string
           updated_at: string
         }
@@ -102,7 +137,7 @@ export interface Database {
           tahun: number
           hadir_putra?: number
           hadir_putri?: number
-          input_by: string
+          input_by: number
           created_at?: string
           updated_at?: string
         }
@@ -113,7 +148,7 @@ export interface Database {
           tahun?: number
           hadir_putra?: number
           hadir_putri?: number
-          input_by?: string
+          input_by?: number
           created_at?: string
           updated_at?: string
         }
