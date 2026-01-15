@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .select('password')
       .eq('id', user.id)
-      .single()
+      .single<{ password: string }>()
 
     if (userError || !userData) {
       return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 })
@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password baru
-    const { error: updateError } = await supabase
+    const supabaseAny = supabase as any
+    const { error: updateError } = await supabaseAny
       .from('users')
       .update({ 
         password: newPassword,
