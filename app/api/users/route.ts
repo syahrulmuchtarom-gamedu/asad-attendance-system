@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       const { data: settings, error } = await supabase
         .from('settings')
         .select('key, value, description')
-        .in('key', ['admin_phone', 'admin_whatsapp'])
+        .in('key', ['admin_phone', 'admin_whatsapp']) as any
       
       if (error) {
         // Return default values if table doesn't exist
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const { data: users, error } = await supabase
       .from('users')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }) as any
 
     if (error) throw error
 
@@ -187,9 +187,9 @@ export async function DELETE(request: NextRequest) {
 
     if (absensiData && absensiData.length > 0) {
       // Jika user pernah input absensi, set input_by ke NULL atau user lain
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('absensi')
-        .update({ input_by: null } as any)
+        .update({ input_by: null })
         .eq('input_by', id)
       
       if (updateError) {
