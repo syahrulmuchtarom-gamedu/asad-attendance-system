@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
         .from('kelompok')
         .select('desa_id')
         .eq('id', data.kelompok_id)
-        .single()
+        .single<{ desa_id: number }>()
       
       if (!kelompok || kelompok.desa_id !== user.desa_id) {
         return NextResponse.json({ 
