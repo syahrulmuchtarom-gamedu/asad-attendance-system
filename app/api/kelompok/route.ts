@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('kelompok')
-      .insert([{ nama_kelompok, desa_id, target_putra, target_putri }])
+      .insert([{ nama_kelompok, desa_id, target_putra, target_putri }] as any)
       .select()
       .single()
 
@@ -156,7 +156,7 @@ export async function PUT(request: NextRequest) {
         target_putra, 
         target_putri,
         updated_at: new Date().toISOString()
-      })
+      } as any)
       .eq('id', id)
       .select()
       .single()

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       .from('desa')
       .select('id')
       .eq('nama_desa', desa)
-      .single()
+      .single<{ id: number }>()
     
     if (desaError || !desaData) {
       console.error('Desa not found:', desaError)

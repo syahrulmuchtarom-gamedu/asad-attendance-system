@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       .eq('username', username)
       .eq('password', password)
       .eq('is_active', true)
-      .single()
+      .single<any>()
 
     console.log('Query result:', { user: user ? 'found' : 'not found', error })
 

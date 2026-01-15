@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         role,
         desa_id: role === 'koordinator_desa' ? desa_id : null,
         is_active: true
-      })
+      } as any)
       .select()
       .single()
 
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
 
     const { data: user, error } = await supabase
       .from('users')
-      .update(updateData)
+      .update(updateData as any)
       .eq('id', id)
       .select()
       .single()
@@ -178,7 +178,7 @@ export async function DELETE(request: NextRequest) {
       .from('absensi')
       .select('id')
       .eq('input_by', id)
-      .limit(1)
+      .limit(1) as any
 
     if (absensiError) {
       console.error('Error checking absensi:', absensiError)
@@ -188,7 +188,7 @@ export async function DELETE(request: NextRequest) {
       // Jika user pernah input absensi, set input_by ke NULL atau user lain
       const { error: updateError } = await supabase
         .from('absensi')
-        .update({ input_by: null })
+        .update({ input_by: null } as any)
         .eq('input_by', id)
       
       if (updateError) {

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         role: 'super_admin',
         desa_id: null,
         is_active: true
-      })
+      } as any)
       .select()
       .single()
 

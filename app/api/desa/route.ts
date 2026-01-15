@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('desa')
-      .insert([{ nama_desa }])
+      .insert([{ nama_desa }] as any)
       .select()
       .single()
 
@@ -70,7 +70,7 @@ export async function PUT(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('desa')
-      .update({ nama_desa })
+      .update({ nama_desa } as any)
       .eq('id', id)
       .select()
       .single()

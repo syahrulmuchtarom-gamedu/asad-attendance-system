@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
         .update({ 
           value,
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .eq('key', key)
       
       if (error) throw error
