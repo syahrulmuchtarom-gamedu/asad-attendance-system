@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       .update({ 
         password: newPassword,
         updated_at: new Date().toISOString()
-      })
+      } as any)
       .eq('id', user.id)
 
     if (updateError) {
