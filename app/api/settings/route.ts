@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 
 export async function GET() {
   try {
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
     
     const { data: settings, error } = await supabase
       .from('settings')
@@ -53,7 +53,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
 
     // Helper function untuk update setting
     const updateSetting = async (key: string, value: string) => {
