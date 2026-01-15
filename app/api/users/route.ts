@@ -140,9 +140,9 @@ export async function PUT(request: NextRequest) {
       updateData.password = password
     }
 
-    const { data: user, error } = await supabase
+    const { data: user, error } = await (supabase as any)
       .from('users')
-      .update(updateData as any)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()
