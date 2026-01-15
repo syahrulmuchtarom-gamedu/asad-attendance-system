@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
       }
       
       // Update or insert settings with proper conflict resolution
-      const { error: phoneError } = await supabase
+      const supabaseAny = supabase as any
+      const { error: phoneError } = await supabaseAny
         .from('settings')
         .upsert({ 
           key: 'admin_phone',
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
           onConflict: 'key'
         })
       
-      const { error: whatsappError } = await supabase
+      const { error: whatsappError } = await supabaseAny
         .from('settings')
         .upsert({ 
           key: 'admin_whatsapp',
