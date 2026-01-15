@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
         .from('kelompok')
         .select('desa_id')
         .eq('id', data.kelompok_id)
-        .single()
+        .single<{ desa_id: number }>()
       
       if (!kelompok || kelompok.desa_id !== user.desa_id) {
         return NextResponse.json({ 
@@ -99,9 +99,9 @@ export async function PUT(request: NextRequest) {
         tahun: data.tahun,
         hadir_putra: data.hadir_putra || 0,
         hadir_putri: data.hadir_putri || 0,
-        input_by: user.id,
+        input_by: String(user.id),
         updated_at: new Date().toISOString()
-      }, {
+      } as any, {
         onConflict: 'kelompok_id,bulan,tahun'
       })
       .select()
