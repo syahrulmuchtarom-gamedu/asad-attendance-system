@@ -222,6 +222,24 @@ export default function LaporanPage() {
         <CardContent>
           <div className="flex gap-4">
             <div className="space-y-2">
+              <label className="text-sm font-medium">Tahun</label>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const year = 2025 + i
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">Bulan</label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="w-40">
@@ -240,24 +258,6 @@ export default function LaporanPage() {
                   <SelectItem value="10">Oktober</SelectItem>
                   <SelectItem value="11">November</SelectItem>
                   <SelectItem value="12">Desember</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tahun</label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 16 }, (_, i) => {
-                    const year = 2025 + i
-                    return (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    )
-                  })}
                 </SelectContent>
               </Select>
             </div>
