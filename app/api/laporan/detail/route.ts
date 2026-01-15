@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
     }
 
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
     
     // Alternatif: Query step by step untuk debugging
     // 1. Cari desa_id berdasarkan nama desa
