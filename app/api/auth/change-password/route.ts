@@ -51,12 +51,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password baru
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase
       .from('users')
       .update({ 
         password: newPassword,
         updated_at: new Date().toISOString()
-      } as any)
+      }) as any)
       .eq('id', user.id)
 
     if (updateError) {
