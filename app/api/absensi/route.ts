@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest) {
         .eq('id', data.kelompok_id)
         .single()
       
-      if (!kelompok || kelompok.desa_id !== user.desa_id) {
+      if (!kelompok || (kelompok as any).desa_id !== user.desa_id) {
         return NextResponse.json({ 
           error: 'Anda tidak memiliki akses untuk kelompok ini' 
         }, { status: 403 })
