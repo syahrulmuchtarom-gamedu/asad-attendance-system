@@ -43,14 +43,14 @@ export async function GET(request: NextRequest) {
         .from('desa')
         .select('id')
         .eq('nama_desa', desaName)
-        .single()
+        .single() as any
       
       if (desaData) {
         query = query.eq('desa_id', desaData.id)
       }
     }
     
-    const { data: kelompok, error } = await query
+    const { data: kelompok, error } = await query as any
 
     if (error) {
       console.error('Kelompok fetch error:', error)
@@ -60,10 +60,10 @@ export async function GET(request: NextRequest) {
     // Get desa names separately
     const { data: desa } = await supabase
       .from('desa')
-      .select('id, nama_desa')
+      .select('id, nama_desa') as any
 
-    const kelompokWithDesa = (kelompok || []).map(k => {
-      const desaInfo = desa?.find(d => d.id === k.desa_id)
+    const kelompokWithDesa = (kelompok || []).map((k: any) => {
+      const desaInfo = desa?.find((d: any) => d.id === k.desa_id)
       return {
         ...k,
         desa_name: desaInfo?.nama_desa || 'Unknown'
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       .from('desa')
       .select('nama_desa')
       .eq('id', desa_id)
-      .single()
+      .single() as any
 
     return NextResponse.json({
       ...data,
@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest) {
       .from('desa')
       .select('nama_desa')
       .eq('id', desa_id)
-      .single()
+      .single() as any
 
     return NextResponse.json({
       ...data,

@@ -18,7 +18,7 @@ export async function GET() {
     const { data: desa, error } = await supabase
       .from('desa')
       .select('*')
-      .order('nama_desa')
+      .order('nama_desa') as any
 
     if (error) {
       console.error('Desa fetch error:', error)
@@ -26,7 +26,7 @@ export async function GET() {
     }
 
     // Simple approach - just return desa without count for now
-    const desaWithCount = (desa || []).map(d => ({
+    const desaWithCount = (desa || []).map((d: any) => ({
       ...d,
       kelompok_count: 0 // Will be updated later
     }))

@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       .select('kelompok_id, hadir_putra, hadir_putri')
       .in('kelompok_id', kelompokIds)
       .eq('bulan', parseInt(bulan))
-      .eq('tahun', parseInt(tahun))
+      .eq('tahun', parseInt(tahun)) as any
     
     console.log('Debug info:', {
       desa,
