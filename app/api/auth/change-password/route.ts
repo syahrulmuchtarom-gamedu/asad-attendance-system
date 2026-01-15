@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password baru
-    // @ts-ignore
     const { error: updateError } = await supabase
       .from('users')
       .update({ 
