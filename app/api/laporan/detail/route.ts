@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const { data: kelompokData, error: kelompokError } = await supabase
       .from('kelompok')
       .select('id, nama_kelompok, target_putra, target_putri')
-      .eq('desa_id', desaData.id)
+      .eq('desa_id', desaData.id) as any
     
     if (kelompokError) {
       console.error('Kelompok fetch error:', kelompokError)
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 3. Cari data absensi untuk kelompok-kelompok tersebut
-    const kelompokIds = kelompokData?.map(k => k.id) || []
+    const kelompokIds = kelompokData?.map((k: any) => k.id) || []
     
     const { data, error } = await supabase
       .from('absensi')
