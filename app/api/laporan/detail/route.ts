@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 3. Cari data absensi untuk kelompok-kelompok tersebut
-    const kelompokIds = kelompokData?.map(k => k.id) || []
+    const kelompokIds = kelompokData?.map((k: any) => k.id) || []
     
     const { data, error } = await supabase
       .from('absensi')
