@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const bulan = searchParams.get('bulan')
     const tahun = searchParams.get('tahun')
 
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
     
     let query = supabase
       .from('absensi')
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
 
     const user = JSON.parse(sessionCookie)
     const data = await request.json()
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
 
     // Validasi: koordinator desa hanya bisa update untuk kelompok di desanya
     if (user.role === 'koordinator_desa') {
