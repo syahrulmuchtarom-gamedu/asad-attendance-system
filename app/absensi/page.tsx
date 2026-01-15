@@ -309,11 +309,9 @@ export default function AbsensiPage() {
   // Show loading while fetching user role
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p>Loading...</p>
-        </div>
+      <div className="flex flex-col justify-center items-center h-64 gap-3">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Memuat data...</p>
       </div>
     )
   }
@@ -324,8 +322,8 @@ export default function AbsensiPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Input Absensi</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Input Absensi</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Pilih desa untuk input data kehadiran bulanan
           </p>
         </div>
@@ -339,11 +337,11 @@ export default function AbsensiPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
-              <div className="space-y-2">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="space-y-2 flex-1">
                 <Label>Bulan</Label>
                 <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -362,10 +360,10 @@ export default function AbsensiPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 flex-1">
                 <Label>Tahun</Label>
                 <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full sm:w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -396,7 +394,7 @@ export default function AbsensiPage() {
             {/* Kategori Khusus - 3 cards di atas */}
             <div className="mb-6">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Kategori Khusus</h3>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {desaList
                   .filter(desa => ['Pengurus Daerah', 'SM/SC + SB', 'Astrida'].includes(desa.nama_desa))
                   .sort((a, b) => {
@@ -406,18 +404,15 @@ export default function AbsensiPage() {
                   .map((desa) => (
                     <Card 
                       key={desa.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-purple-300 bg-purple-50 dark:bg-purple-950"
+                      className="cursor-pointer hover:shadow-md active:scale-95 transition-all border-2 hover:border-purple-300 bg-purple-50 dark:bg-purple-950"
                       onClick={() => handleDesaClick(desa.nama_desa)}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-6">
                         <div className="text-center">
                           <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            Klik untuk input absensi
+                          <p className="text-sm text-muted-foreground">
+                            Tap untuk input absensi
                           </p>
-                          <Button variant="outline" size="sm" className="w-full">
-                            Input Absensi
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -429,24 +424,21 @@ export default function AbsensiPage() {
             {/* Desa Regular - 8 cards di bawah */}
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Desa</h3>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {desaList
                   .filter(desa => !['Pengurus Daerah', 'SM/SC + SB', 'Astrida'].includes(desa.nama_desa))
                   .map((desa) => (
                     <Card 
                       key={desa.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
+                      className="cursor-pointer hover:shadow-md active:scale-95 transition-all border-2 hover:border-blue-300"
                       onClick={() => handleDesaClick(desa.nama_desa)}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-6">
                         <div className="text-center">
                           <h3 className="font-semibold text-lg mb-2">{desa.nama_desa}</h3>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            Klik untuk input absensi
+                          <p className="text-sm text-muted-foreground">
+                            Tap untuk input absensi
                           </p>
-                          <Button variant="outline" size="sm" className="w-full">
-                            Input Absensi
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -463,18 +455,18 @@ export default function AbsensiPage() {
   // Regular form for koordinator desa or super admin after selecting desa
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             Input Absensi {selectedDesa && `- ${selectedDesa}`}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Input data kehadiran bulanan per kelompok
           </p>
         </div>
         {(userRole === 'super_admin' || userRole === 'astrida') && selectedDesa && (
-          <Button variant="outline" onClick={handleBackToDesa}>
-            ← Kembali ke Daftar Desa
+          <Button variant="outline" onClick={handleBackToDesa} className="w-full sm:w-auto">
+            ← Kembali
           </Button>
         )}
       </div>
@@ -506,11 +498,11 @@ export default function AbsensiPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
-              <div className="space-y-2">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="space-y-2 flex-1">
                 <Label>Bulan</Label>
                 <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -529,10 +521,10 @@ export default function AbsensiPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 flex-1">
                 <Label>Tahun</Label>
                 <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full sm:w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -553,7 +545,7 @@ export default function AbsensiPage() {
       )}
 
       {/* Summary */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Target</CardTitle>
@@ -621,19 +613,19 @@ export default function AbsensiPage() {
                       )}
                     </h3>
                     {hasExistingData && (
-                      <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                        <CheckCircle className="h-3 w-3" />
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600 dark:text-green-400">
+                        <CheckCircle className="h-4 w-4" />
                         Tersimpan
                       </div>
                     )}
                     {isDataChanged && (
-                      <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                        <Edit className="h-3 w-3" />
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-blue-600 dark:text-blue-400">
+                        <Edit className="h-4 w-4" />
                         Diubah
                       </div>
                     )}
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                     <div>
                       <Label>Hadir Putra (Target: {kelompok.target_putra})</Label>
                       <Input
@@ -643,7 +635,7 @@ export default function AbsensiPage() {
                         value={absensiData[kelompok.id]?.hadir_putra ?? ''}
                         onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
                         placeholder="0"
-                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                        className={`min-h-[44px] text-base ${hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}`}
                       />
                     </div>
                     <div>
@@ -655,7 +647,7 @@ export default function AbsensiPage() {
                         value={absensiData[kelompok.id]?.hadir_putri ?? ''}
                         onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
                         placeholder="0"
-                        className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                        className={`min-h-[44px] text-base ${hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}`}
                       />
                     </div>
                   </div>
@@ -685,19 +677,19 @@ export default function AbsensiPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-medium text-lg">{kelompok.nama_kelompok}</h3>
                         {hasExistingData && (
-                          <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                            <CheckCircle className="h-3 w-3" />
+                          <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600 dark:text-green-400">
+                            <CheckCircle className="h-4 w-4" />
                             Tersimpan
                           </div>
                         )}
                         {isDataChanged && (
-                          <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                            <Edit className="h-3 w-3" />
+                          <div className="flex items-center gap-1 text-xs sm:text-sm text-blue-600 dark:text-blue-400">
+                            <Edit className="h-4 w-4" />
                             Diubah
                           </div>
                         )}
                       </div>
-                      <div className="grid gap-4 md:grid-cols-2">
+                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                         <div>
                           <Label>Hadir Putra</Label>
                           <Input
@@ -706,7 +698,7 @@ export default function AbsensiPage() {
                             value={absensiData[kelompok.id]?.hadir_putra ?? ''}
                             onChange={(e) => handleInputChange(kelompok.id, 'hadir_putra', e.target.value)}
                             placeholder="0"
-                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                            className={`min-h-[44px] text-base ${hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}`}
                           />
                         </div>
                         <div>
@@ -717,7 +709,7 @@ export default function AbsensiPage() {
                             value={absensiData[kelompok.id]?.hadir_putri ?? ''}
                             onChange={(e) => handleInputChange(kelompok.id, 'hadir_putri', e.target.value)}
                             placeholder="0"
-                            className={hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}
+                            className={`min-h-[44px] text-base ${hasExistingData ? 'bg-background border-green-300 dark:border-green-700' : ''}`}
                           />
                         </div>
                       </div>
@@ -731,6 +723,7 @@ export default function AbsensiPage() {
             <Button 
               onClick={handleSubmit} 
               disabled={loading || dataStatus === 'loading' || kelompokList.length === 0}
+              className="w-full sm:w-auto min-h-[44px]"
             >
               <Save className="mr-2 h-4 w-4" />
               {loading ? 'Menyimpan...' : 'Simpan Data'}
