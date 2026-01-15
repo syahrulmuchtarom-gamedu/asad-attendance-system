@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use admin client to bypass RLS
-    const supabase = createAdminClient()
+    const supabase = createAdminClient() as any
     
     console.log('Querying users table with admin client...')
 
