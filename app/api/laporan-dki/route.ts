@@ -26,12 +26,12 @@ export async function GET(request: NextRequest) {
     // Get total target dari SEMUA kelompok (tidak tergantung ada absensi atau tidak)
     const { data: allKelompok, error: kelompokError } = await supabase
       .from('kelompok')
-      .select('target_putra, target_putri')
+      .select('target_putra, target_putri') as any
     
     if (kelompokError) throw kelompokError
     
-    const totalTargetPutra = allKelompok.reduce((sum, k) => sum + (k.target_putra || 0), 0)
-    const totalTargetPutri = allKelompok.reduce((sum, k) => sum + (k.target_putri || 0), 0)
+    const totalTargetPutra = allKelompok.reduce((sum: number, k: any) => sum + (k.target_putra || 0), 0)
+    const totalTargetPutri = allKelompok.reduce((sum: number, k: any) => sum + (k.target_putri || 0), 0)
     
     // Query data absensi per bulan
     const { data, error } = await supabase
