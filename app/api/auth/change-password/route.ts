@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .select('password')
       .eq('id', user.id)
-      .single()
+      .single<{ password: string }>()
 
     if (userError || !userData) {
       return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 })
